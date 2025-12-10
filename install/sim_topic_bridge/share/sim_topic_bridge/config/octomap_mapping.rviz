@@ -1,0 +1,16 @@
+Visualization Manager:
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+    - Class: rviz_default_plugins/TF
+      Name: TF
+    - Class: rviz_default_plugins/PointCloud2
+      Topic:
+        Value: /camera/points
+      Name: PointCloud
+    - Class: rviz_default_plugins/MarkerArray
+      Topic:
+        Value: /octomap_occupied_cells_vis
+      Name: OctoMap
+  Global Options:
+    Fixed Frame: map

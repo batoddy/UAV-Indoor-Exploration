@@ -1,0 +1,588 @@
+[0.076s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[0.076s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=8, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, mixin_files=None, mixin=None, verb_parser=<colcon_mixin.mixin.mixin_argument.MixinArgumentDecorator object at 0x73afc4179540>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x73afc4179030>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x73afc4179030>>, mixin_verb=('build',))
+[0.194s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.194s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.194s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.194s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.194s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.195s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.195s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/batoddy/uav_ws/src'
+[0.195s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.195s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.195s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.195s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.195s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.195s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.195s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.195s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.195s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extensions ['ignore', 'ignore_ament_install']
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extension 'ignore'
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extension 'ignore_ament_install'
+[0.210s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extensions ['colcon_pkg']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extension 'colcon_pkg'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extensions ['colcon_meta']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extension 'colcon_meta'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extensions ['ros']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extension 'ros'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extensions ['cmake', 'python']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extension 'cmake'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extension 'python'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extensions ['python_setup_py']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib) by extension 'python_setup_py'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extensions ['ignore', 'ignore_ament_install']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extension 'ignore'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extension 'ignore_ament_install'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extensions ['colcon_pkg']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extension 'colcon_pkg'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extensions ['colcon_meta']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extension 'colcon_meta'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extensions ['ros']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extension 'ros'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extensions ['cmake', 'python']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extension 'cmake'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extension 'python'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extensions ['python_setup_py']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples) by extension 'python_setup_py'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extensions ['ignore', 'ignore_ament_install']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extension 'ignore'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extension 'ignore_ament_install'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extensions ['colcon_pkg']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extension 'colcon_pkg'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extensions ['colcon_meta']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extension 'colcon_meta'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extensions ['ros']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extension 'ros'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extensions ['cmake', 'python']
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extension 'cmake'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extension 'python'
+[0.211s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extensions ['python_setup_py']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp) by extension 'python_setup_py'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extensions ['ignore', 'ignore_ament_install']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extension 'ignore'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extension 'ignore_ament_install'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extensions ['colcon_pkg']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extension 'colcon_pkg'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extensions ['colcon_meta']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extension 'colcon_meta'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extensions ['ros']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extension 'ros'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extensions ['cmake', 'python']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extension 'cmake'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extension 'python'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extensions ['python_setup_py']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes) by extension 'python_setup_py'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes) by extensions ['ignore', 'ignore_ament_install']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes) by extension 'ignore'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes) by extension 'ignore_ament_install'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes) by extensions ['colcon_pkg']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes) by extension 'colcon_pkg'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes) by extensions ['colcon_meta']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes) by extension 'colcon_meta'
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes) by extensions ['ros']
+[0.212s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes) by extension 'ros'
+[0.215s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes' with type 'ros.ament_cmake' and name 'example_executor_with_multiple_modes_cpp'
+[0.215s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/fw_attitude) by extensions ['ignore', 'ignore_ament_install']
+[0.215s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/fw_attitude) by extension 'ignore'
+[0.215s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/fw_attitude) by extension 'ignore_ament_install'
+[0.215s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/fw_attitude) by extensions ['colcon_pkg']
+[0.215s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/fw_attitude) by extension 'colcon_pkg'
+[0.215s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/fw_attitude) by extensions ['colcon_meta']
+[0.215s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/fw_attitude) by extension 'colcon_meta'
+[0.215s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/fw_attitude) by extensions ['ros']
+[0.215s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/fw_attitude) by extension 'ros'
+[0.215s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/modes/fw_attitude' with type 'ros.ament_cmake' and name 'example_mode_fw_attitude_cpp'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto) by extensions ['ignore', 'ignore_ament_install']
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto) by extension 'ignore'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto) by extension 'ignore_ament_install'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto) by extensions ['colcon_pkg']
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto) by extension 'colcon_pkg'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto) by extensions ['colcon_meta']
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto) by extension 'colcon_meta'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto) by extensions ['ros']
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto) by extension 'ros'
+[0.216s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/modes/goto' with type 'ros.ament_cmake' and name 'example_mode_goto_cpp'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto_global) by extensions ['ignore', 'ignore_ament_install']
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto_global) by extension 'ignore'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto_global) by extension 'ignore_ament_install'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto_global) by extensions ['colcon_pkg']
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto_global) by extension 'colcon_pkg'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto_global) by extensions ['colcon_meta']
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto_global) by extension 'colcon_meta'
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto_global) by extensions ['ros']
+[0.216s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/goto_global) by extension 'ros'
+[0.225s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/modes/goto_global' with type 'ros.ament_cmake' and name 'example_mode_goto_global_cpp'
+[0.225s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/manual) by extensions ['ignore', 'ignore_ament_install']
+[0.225s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/manual) by extension 'ignore'
+[0.225s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/manual) by extension 'ignore_ament_install'
+[0.225s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/manual) by extensions ['colcon_pkg']
+[0.225s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/manual) by extension 'colcon_pkg'
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/manual) by extensions ['colcon_meta']
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/manual) by extension 'colcon_meta'
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/manual) by extensions ['ros']
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/manual) by extension 'ros'
+[0.226s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/modes/manual' with type 'ros.ament_cmake' and name 'example_mode_manual_cpp'
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor) by extensions ['ignore', 'ignore_ament_install']
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor) by extension 'ignore'
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor) by extension 'ignore_ament_install'
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor) by extensions ['colcon_pkg']
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor) by extension 'colcon_pkg'
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor) by extensions ['colcon_meta']
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor) by extension 'colcon_meta'
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor) by extensions ['ros']
+[0.226s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor) by extension 'ros'
+[0.227s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor' with type 'ros.ament_cmake' and name 'example_mode_with_executor_cpp'
+[0.227s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement) by extensions ['ignore', 'ignore_ament_install']
+[0.227s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement) by extension 'ignore'
+[0.227s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement) by extension 'ignore_ament_install'
+[0.227s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement) by extensions ['colcon_pkg']
+[0.227s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement) by extension 'colcon_pkg'
+[0.227s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement) by extensions ['colcon_meta']
+[0.227s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement) by extension 'colcon_meta'
+[0.227s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement) by extensions ['ros']
+[0.227s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement) by extension 'ros'
+[0.228s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement' with type 'ros.ament_cmake' and name 'example_mode_rtl_replacement_cpp'
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/vtol) by extensions ['ignore', 'ignore_ament_install']
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/vtol) by extension 'ignore'
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/vtol) by extension 'ignore_ament_install'
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/vtol) by extensions ['colcon_pkg']
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/vtol) by extension 'colcon_pkg'
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/vtol) by extensions ['colcon_meta']
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/vtol) by extension 'colcon_meta'
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/vtol) by extensions ['ros']
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/modes/vtol) by extension 'ros'
+[0.228s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/modes/vtol' with type 'ros.ament_cmake' and name 'example_mode_vtol_cpp'
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extensions ['ignore', 'ignore_ament_install']
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extension 'ignore'
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extension 'ignore_ament_install'
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extensions ['colcon_pkg']
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extension 'colcon_pkg'
+[0.228s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extensions ['colcon_meta']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extension 'colcon_meta'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extensions ['ros']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extension 'ros'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extensions ['cmake', 'python']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extension 'cmake'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extension 'python'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extensions ['python_setup_py']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation) by extension 'python_setup_py'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/global_navigation) by extensions ['ignore', 'ignore_ament_install']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/global_navigation) by extension 'ignore'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/global_navigation) by extension 'ignore_ament_install'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/global_navigation) by extensions ['colcon_pkg']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/global_navigation) by extension 'colcon_pkg'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/global_navigation) by extensions ['colcon_meta']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/global_navigation) by extension 'colcon_meta'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/global_navigation) by extensions ['ros']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/global_navigation) by extension 'ros'
+[0.229s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/navigation/global_navigation' with type 'ros.ament_cmake' and name 'example_global_navigation_cpp'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/local_navigation) by extensions ['ignore', 'ignore_ament_install']
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/local_navigation) by extension 'ignore'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/local_navigation) by extension 'ignore_ament_install'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/local_navigation) by extensions ['colcon_pkg']
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/local_navigation) by extension 'colcon_pkg'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/local_navigation) by extensions ['colcon_meta']
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/local_navigation) by extension 'colcon_meta'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/local_navigation) by extensions ['ros']
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/examples/cpp/navigation/local_navigation) by extension 'ros'
+[0.230s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/examples/cpp/navigation/local_navigation' with type 'ros.ament_cmake' and name 'example_local_navigation_cpp'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/px4_ros2_cpp) by extensions ['ignore', 'ignore_ament_install']
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/px4_ros2_cpp) by extension 'ignore'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/px4_ros2_cpp) by extension 'ignore_ament_install'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/px4_ros2_cpp) by extensions ['colcon_pkg']
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/px4_ros2_cpp) by extension 'colcon_pkg'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/px4_ros2_cpp) by extensions ['colcon_meta']
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/px4_ros2_cpp) by extension 'colcon_meta'
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/px4_ros2_cpp) by extensions ['ros']
+[0.230s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/px4_ros2_cpp) by extension 'ros'
+[0.231s] DEBUG:colcon.colcon_core.package_identification:Package 'px4-ros2-interface-lib/px4_ros2_cpp' with type 'ros.ament_cmake' and name 'px4_ros2_cpp'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extensions ['ignore', 'ignore_ament_install']
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extension 'ignore'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extension 'ignore_ament_install'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extensions ['colcon_pkg']
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extension 'colcon_pkg'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extensions ['colcon_meta']
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extension 'colcon_meta'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extensions ['ros']
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extension 'ros'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extensions ['cmake', 'python']
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extension 'cmake'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extension 'python'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extensions ['python_setup_py']
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4-ros2-interface-lib/scripts) by extension 'python_setup_py'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extensions ['ignore', 'ignore_ament_install']
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'ignore'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'ignore_ament_install'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extensions ['colcon_pkg']
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'colcon_pkg'
+[0.231s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extensions ['colcon_meta']
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'colcon_meta'
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extensions ['ros']
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'ros'
+[0.232s] DEBUG:colcon.colcon_core.package_identification:Package 'px4_msgs' with type 'ros.ament_cmake' and name 'px4_msgs'
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_offboard) by extensions ['ignore', 'ignore_ament_install']
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_offboard) by extension 'ignore'
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_offboard) by extension 'ignore_ament_install'
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_offboard) by extensions ['colcon_pkg']
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_offboard) by extension 'colcon_pkg'
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_offboard) by extensions ['colcon_meta']
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_offboard) by extension 'colcon_meta'
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_offboard) by extensions ['ros']
+[0.232s] Level 1:colcon.colcon_core.package_identification:_identify(px4_offboard) by extension 'ros'
+[0.233s] DEBUG:colcon.colcon_core.package_identification:Package 'px4_offboard' with type 'ros.ament_python' and name 'px4_offboard'
+[0.233s] Level 1:colcon.colcon_core.package_identification:_identify(px4_ros_com) by extensions ['ignore', 'ignore_ament_install']
+[0.233s] Level 1:colcon.colcon_core.package_identification:_identify(px4_ros_com) by extension 'ignore'
+[0.233s] Level 1:colcon.colcon_core.package_identification:_identify(px4_ros_com) by extension 'ignore_ament_install'
+[0.233s] Level 1:colcon.colcon_core.package_identification:_identify(px4_ros_com) by extensions ['colcon_pkg']
+[0.233s] Level 1:colcon.colcon_core.package_identification:_identify(px4_ros_com) by extension 'colcon_pkg'
+[0.233s] Level 1:colcon.colcon_core.package_identification:_identify(px4_ros_com) by extensions ['colcon_meta']
+[0.233s] Level 1:colcon.colcon_core.package_identification:_identify(px4_ros_com) by extension 'colcon_meta'
+[0.233s] Level 1:colcon.colcon_core.package_identification:_identify(px4_ros_com) by extensions ['ros']
+[0.233s] Level 1:colcon.colcon_core.package_identification:_identify(px4_ros_com) by extension 'ros'
+[0.234s] DEBUG:colcon.colcon_core.package_identification:Package 'px4_ros_com' with type 'ros.ament_cmake' and name 'px4_ros_com'
+[0.234s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.234s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.234s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.234s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.234s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.250s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.250s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.251s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 4 installed packages in /home/batoddy/uav_ws/install
+[0.251s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/batoddy/orn_ws/install
+[0.252s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 14 installed packages in /home/batoddy/install
+[0.254s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 369 installed packages in /opt/ros/humble
+[0.256s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_msgs' build argument 'cmake_args' from command line to 'None'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_msgs' build argument 'cmake_target' from command line to 'None'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_msgs' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_msgs' build argument 'cmake_clean_cache' from command line to 'False'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_msgs' build argument 'cmake_clean_first' from command line to 'False'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_msgs' build argument 'cmake_force_configure' from command line to 'False'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_msgs' build argument 'ament_cmake_args' from command line to 'None'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_msgs' build argument 'catkin_cmake_args' from command line to 'None'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_msgs' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.315s] DEBUG:colcon.colcon_core.verb:Building package 'px4_msgs' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/px4_msgs', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/px4_msgs', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4_msgs', 'symlink_install': False, 'test_result_base': None}
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_offboard' build argument 'cmake_args' from command line to 'None'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_offboard' build argument 'cmake_target' from command line to 'None'
+[0.315s] Level 5:colcon.colcon_core.verb:set package 'px4_offboard' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_offboard' build argument 'cmake_clean_cache' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_offboard' build argument 'cmake_clean_first' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_offboard' build argument 'cmake_force_configure' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_offboard' build argument 'ament_cmake_args' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_offboard' build argument 'catkin_cmake_args' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_offboard' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.316s] DEBUG:colcon.colcon_core.verb:Building package 'px4_offboard' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/px4_offboard', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/px4_offboard', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4_offboard', 'symlink_install': False, 'test_result_base': None}
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros2_cpp' build argument 'cmake_args' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros2_cpp' build argument 'cmake_target' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros2_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros2_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros2_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros2_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros2_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros2_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros2_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.316s] DEBUG:colcon.colcon_core.verb:Building package 'px4_ros2_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/px4_ros2_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/px4_ros2_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/px4_ros2_cpp', 'symlink_install': False, 'test_result_base': None}
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros_com' build argument 'cmake_args' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros_com' build argument 'cmake_target' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros_com' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros_com' build argument 'cmake_clean_cache' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros_com' build argument 'cmake_clean_first' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros_com' build argument 'cmake_force_configure' from command line to 'False'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros_com' build argument 'ament_cmake_args' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros_com' build argument 'catkin_cmake_args' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'px4_ros_com' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.316s] DEBUG:colcon.colcon_core.verb:Building package 'px4_ros_com' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/px4_ros_com', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/px4_ros_com', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4_ros_com', 'symlink_install': False, 'test_result_base': None}
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'example_executor_with_multiple_modes_cpp' build argument 'cmake_args' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'example_executor_with_multiple_modes_cpp' build argument 'cmake_target' from command line to 'None'
+[0.316s] Level 5:colcon.colcon_core.verb:set package 'example_executor_with_multiple_modes_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_executor_with_multiple_modes_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_executor_with_multiple_modes_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_executor_with_multiple_modes_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_executor_with_multiple_modes_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_executor_with_multiple_modes_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_executor_with_multiple_modes_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.317s] DEBUG:colcon.colcon_core.verb:Building package 'example_executor_with_multiple_modes_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_executor_with_multiple_modes_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_executor_with_multiple_modes_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/modes/executor_with_multiple_modes', 'symlink_install': False, 'test_result_base': None}
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_global_navigation_cpp' build argument 'cmake_args' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_global_navigation_cpp' build argument 'cmake_target' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_global_navigation_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_global_navigation_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_global_navigation_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_global_navigation_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_global_navigation_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_global_navigation_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_global_navigation_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.317s] DEBUG:colcon.colcon_core.verb:Building package 'example_global_navigation_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_global_navigation_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_global_navigation_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/navigation/global_navigation', 'symlink_install': False, 'test_result_base': None}
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_local_navigation_cpp' build argument 'cmake_args' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_local_navigation_cpp' build argument 'cmake_target' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_local_navigation_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_local_navigation_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_local_navigation_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_local_navigation_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_local_navigation_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_local_navigation_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_local_navigation_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.317s] DEBUG:colcon.colcon_core.verb:Building package 'example_local_navigation_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_local_navigation_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_local_navigation_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/navigation/local_navigation', 'symlink_install': False, 'test_result_base': None}
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_mode_fw_attitude_cpp' build argument 'cmake_args' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_mode_fw_attitude_cpp' build argument 'cmake_target' from command line to 'None'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_mode_fw_attitude_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.317s] Level 5:colcon.colcon_core.verb:set package 'example_mode_fw_attitude_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_fw_attitude_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_fw_attitude_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_fw_attitude_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_fw_attitude_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_fw_attitude_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.318s] DEBUG:colcon.colcon_core.verb:Building package 'example_mode_fw_attitude_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_mode_fw_attitude_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_mode_fw_attitude_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/modes/fw_attitude', 'symlink_install': False, 'test_result_base': None}
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_cpp' build argument 'cmake_args' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_cpp' build argument 'cmake_target' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.318s] DEBUG:colcon.colcon_core.verb:Building package 'example_mode_goto_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_mode_goto_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_mode_goto_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/modes/goto', 'symlink_install': False, 'test_result_base': None}
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_global_cpp' build argument 'cmake_args' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_global_cpp' build argument 'cmake_target' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_global_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_global_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_global_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_global_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_global_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_global_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_goto_global_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.318s] DEBUG:colcon.colcon_core.verb:Building package 'example_mode_goto_global_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_mode_goto_global_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_mode_goto_global_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/modes/goto_global', 'symlink_install': False, 'test_result_base': None}
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_manual_cpp' build argument 'cmake_args' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_manual_cpp' build argument 'cmake_target' from command line to 'None'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_manual_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_manual_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.318s] Level 5:colcon.colcon_core.verb:set package 'example_mode_manual_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_manual_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_manual_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_manual_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_manual_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.319s] DEBUG:colcon.colcon_core.verb:Building package 'example_mode_manual_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_mode_manual_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_mode_manual_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/modes/manual', 'symlink_install': False, 'test_result_base': None}
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_rtl_replacement_cpp' build argument 'cmake_args' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_rtl_replacement_cpp' build argument 'cmake_target' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_rtl_replacement_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_rtl_replacement_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_rtl_replacement_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_rtl_replacement_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_rtl_replacement_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_rtl_replacement_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_rtl_replacement_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.319s] DEBUG:colcon.colcon_core.verb:Building package 'example_mode_rtl_replacement_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_mode_rtl_replacement_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_mode_rtl_replacement_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/modes/rtl_replacement', 'symlink_install': False, 'test_result_base': None}
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_vtol_cpp' build argument 'cmake_args' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_vtol_cpp' build argument 'cmake_target' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_vtol_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_vtol_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_vtol_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_vtol_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_vtol_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_vtol_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_vtol_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.319s] DEBUG:colcon.colcon_core.verb:Building package 'example_mode_vtol_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_mode_vtol_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_mode_vtol_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/modes/vtol', 'symlink_install': False, 'test_result_base': None}
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_with_executor_cpp' build argument 'cmake_args' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_with_executor_cpp' build argument 'cmake_target' from command line to 'None'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_with_executor_cpp' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_with_executor_cpp' build argument 'cmake_clean_cache' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_with_executor_cpp' build argument 'cmake_clean_first' from command line to 'False'
+[0.319s] Level 5:colcon.colcon_core.verb:set package 'example_mode_with_executor_cpp' build argument 'cmake_force_configure' from command line to 'False'
+[0.320s] Level 5:colcon.colcon_core.verb:set package 'example_mode_with_executor_cpp' build argument 'ament_cmake_args' from command line to 'None'
+[0.320s] Level 5:colcon.colcon_core.verb:set package 'example_mode_with_executor_cpp' build argument 'catkin_cmake_args' from command line to 'None'
+[0.320s] Level 5:colcon.colcon_core.verb:set package 'example_mode_with_executor_cpp' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.320s] DEBUG:colcon.colcon_core.verb:Building package 'example_mode_with_executor_cpp' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/batoddy/uav_ws/src/build/example_mode_with_executor_cpp', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/batoddy/uav_ws/src/install/example_mode_with_executor_cpp', 'merge_install': False, 'path': '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/modes/mode_with_executor', 'symlink_install': False, 'test_result_base': None}
+[0.320s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.321s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.321s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/batoddy/uav_ws/src/px4_msgs' with build type 'ament_cmake'
+[0.321s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/batoddy/uav_ws/src/px4_msgs'
+[0.323s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.323s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.323s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.330s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/batoddy/uav_ws/src/build/px4_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake /home/batoddy/uav_ws/src/px4_msgs -DCMAKE_INSTALL_PREFIX=/home/batoddy/uav_ws/src/install/px4_msgs
+[3.034s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/batoddy/uav_ws/src/build/px4_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake /home/batoddy/uav_ws/src/px4_msgs -DCMAKE_INSTALL_PREFIX=/home/batoddy/uav_ws/src/install/px4_msgs
+[3.036s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/batoddy/uav_ws/src/build/px4_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake --build /home/batoddy/uav_ws/src/build/px4_msgs -- -j8 -l8
+[232.593s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/batoddy/uav_ws/src/build/px4_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake --build /home/batoddy/uav_ws/src/build/px4_msgs -- -j8 -l8
+[232.605s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/batoddy/uav_ws/src/build/px4_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake --install /home/batoddy/uav_ws/src/build/px4_msgs
+[233.773s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(px4_msgs)
+[233.774s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/batoddy/uav_ws/src/build/px4_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake --install /home/batoddy/uav_ws/src/build/px4_msgs
+[233.776s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs' for CMake module files
+[233.776s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs' for CMake config files
+[233.780s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_msgs', 'cmake_prefix_path')
+[233.781s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/cmake_prefix_path.ps1'
+[233.781s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/cmake_prefix_path.dsv'
+[233.781s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/cmake_prefix_path.sh'
+[233.782s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/lib'
+[233.782s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_msgs', 'ld_library_path_lib')
+[233.783s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/ld_library_path_lib.ps1'
+[233.783s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/ld_library_path_lib.dsv'
+[233.783s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/ld_library_path_lib.sh'
+[233.783s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/bin'
+[233.783s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/lib/pkgconfig/px4_msgs.pc'
+[233.784s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/lib/python3.10/site-packages'
+[233.784s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/bin'
+[233.784s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.ps1'
+[233.785s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.dsv'
+[233.785s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.sh'
+[233.786s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.bash'
+[233.787s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.zsh'
+[233.787s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/batoddy/uav_ws/src/install/px4_msgs/share/colcon-core/packages/px4_msgs)
+[233.788s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(px4_msgs)
+[233.788s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs' for CMake module files
+[233.788s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs' for CMake config files
+[233.792s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_msgs', 'cmake_prefix_path')
+[233.793s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/cmake_prefix_path.ps1'
+[233.793s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/cmake_prefix_path.dsv'
+[233.793s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/cmake_prefix_path.sh'
+[233.794s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/lib'
+[233.794s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_msgs', 'ld_library_path_lib')
+[233.794s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/ld_library_path_lib.ps1'
+[233.794s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/ld_library_path_lib.dsv'
+[233.794s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/hook/ld_library_path_lib.sh'
+[233.795s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/bin'
+[233.795s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/lib/pkgconfig/px4_msgs.pc'
+[233.795s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/lib/python3.10/site-packages'
+[233.795s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_msgs/bin'
+[233.796s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.ps1'
+[233.796s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.dsv'
+[233.796s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.sh'
+[233.797s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.bash'
+[233.797s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_msgs/share/px4_msgs/package.zsh'
+[233.797s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/batoddy/uav_ws/src/install/px4_msgs/share/colcon-core/packages/px4_msgs)
+[233.798s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/px4_ros2_cpp' with build type 'ament_cmake'
+[233.798s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/batoddy/uav_ws/src/px4-ros2-interface-lib/px4_ros2_cpp'
+[233.798s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[233.798s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[233.802s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/batoddy/uav_ws/src/px4_offboard' with build type 'ament_python'
+[233.803s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_offboard', 'ament_prefix_path')
+[233.803s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/hook/ament_prefix_path.ps1'
+[233.803s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/hook/ament_prefix_path.dsv'
+[233.804s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/hook/ament_prefix_path.sh'
+[233.804s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[233.804s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[233.808s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/batoddy/uav_ws/src/px4_ros_com' with build type 'ament_cmake'
+[233.808s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/batoddy/uav_ws/src/px4_ros_com'
+[233.809s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[233.809s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[233.816s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/batoddy/uav_ws/src/build/px4_ros2_cpp': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake /home/batoddy/uav_ws/src/px4-ros2-interface-lib/px4_ros2_cpp -DCMAKE_INSTALL_PREFIX=/home/batoddy/uav_ws/src/install/px4_ros2_cpp
+[234.065s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/batoddy/uav_ws/src/px4_offboard'
+[234.065s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[234.065s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[234.074s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/batoddy/uav_ws/src/build/px4_ros_com': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake /home/batoddy/uav_ws/src/px4_ros_com -DCMAKE_INSTALL_PREFIX=/home/batoddy/uav_ws/src/install/px4_ros_com
+[234.456s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/batoddy/uav_ws/src/px4_offboard': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/build/px4_offboard/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/batoddy/uav_ws/src/install/px4_offboard/lib/python3.10/site-packages:/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/px4_offboard build --build-base /home/batoddy/uav_ws/src/build/px4_offboard/build install --record /home/batoddy/uav_ws/src/build/px4_offboard/install.log --single-version-externally-managed install_data
+[234.821s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_offboard' for CMake module files
+[234.821s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/batoddy/uav_ws/src/px4_offboard' returned '0': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/build/px4_offboard/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/batoddy/uav_ws/src/install/px4_offboard/lib/python3.10/site-packages:/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/px4_offboard build --build-base /home/batoddy/uav_ws/src/build/px4_offboard/build install --record /home/batoddy/uav_ws/src/build/px4_offboard/install.log --single-version-externally-managed install_data
+[234.822s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_offboard' for CMake config files
+[234.822s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_offboard/lib'
+[234.822s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_offboard/bin'
+[234.822s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_offboard/lib/pkgconfig/px4_offboard.pc'
+[234.823s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_offboard/lib/python3.10/site-packages'
+[234.823s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_offboard', 'pythonpath')
+[234.823s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/hook/pythonpath.ps1'
+[234.823s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/hook/pythonpath.dsv'
+[234.824s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/hook/pythonpath.sh'
+[234.825s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_offboard/bin'
+[234.825s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(px4_offboard)
+[234.825s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/package.ps1'
+[234.826s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/package.dsv'
+[234.827s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/package.sh'
+[234.828s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/package.bash'
+[234.828s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_offboard/share/px4_offboard/package.zsh'
+[234.828s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/batoddy/uav_ws/src/install/px4_offboard/share/colcon-core/packages/px4_offboard)
+[235.147s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/batoddy/uav_ws/src/build/px4_ros2_cpp' returned '0': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake /home/batoddy/uav_ws/src/px4-ros2-interface-lib/px4_ros2_cpp -DCMAKE_INSTALL_PREFIX=/home/batoddy/uav_ws/src/install/px4_ros2_cpp
+[235.149s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/batoddy/uav_ws/src/build/px4_ros2_cpp': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /home/batoddy/uav_ws/src/build/px4_ros2_cpp -- -j8 -l8
+[236.003s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/batoddy/uav_ws/src/build/px4_ros_com' returned '0': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake /home/batoddy/uav_ws/src/px4_ros_com -DCMAKE_INSTALL_PREFIX=/home/batoddy/uav_ws/src/install/px4_ros_com
+[236.004s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/batoddy/uav_ws/src/build/px4_ros_com': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /home/batoddy/uav_ws/src/build/px4_ros_com -- -j8 -l8
+[264.807s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/batoddy/uav_ws/src/build/px4_ros_com' returned '0': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /home/batoddy/uav_ws/src/build/px4_ros_com -- -j8 -l8
+[264.814s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/batoddy/uav_ws/src/build/px4_ros_com': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /home/batoddy/uav_ws/src/build/px4_ros_com
+[265.098s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(px4_ros_com)
+[265.098s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com' for CMake module files
+[265.099s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/batoddy/uav_ws/src/build/px4_ros_com' returned '0': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /home/batoddy/uav_ws/src/build/px4_ros_com
+[265.100s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com' for CMake config files
+[265.104s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_ros_com', 'cmake_prefix_path')
+[265.105s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/cmake_prefix_path.ps1'
+[265.106s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/cmake_prefix_path.dsv'
+[265.106s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/cmake_prefix_path.sh'
+[265.111s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/lib'
+[265.112s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_ros_com', 'ld_library_path_lib')
+[265.112s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/ld_library_path_lib.ps1'
+[265.113s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/ld_library_path_lib.dsv'
+[265.116s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/ld_library_path_lib.sh'
+[265.117s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/bin'
+[265.118s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/lib/pkgconfig/px4_ros_com.pc'
+[265.119s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/lib/python3.10/site-packages'
+[265.119s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/bin'
+[265.120s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.ps1'
+[265.121s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.dsv'
+[265.126s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.sh'
+[265.127s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.bash'
+[265.128s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.zsh'
+[265.128s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/batoddy/uav_ws/src/install/px4_ros_com/share/colcon-core/packages/px4_ros_com)
+[265.133s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(px4_ros_com)
+[265.133s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com' for CMake module files
+[265.138s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com' for CMake config files
+[265.139s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_ros_com', 'cmake_prefix_path')
+[265.139s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/cmake_prefix_path.ps1'
+[265.140s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/cmake_prefix_path.dsv'
+[265.141s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/cmake_prefix_path.sh'
+[265.142s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/lib'
+[265.142s] Level 1:colcon.colcon_core.shell:create_environment_hook('px4_ros_com', 'ld_library_path_lib')
+[265.143s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/ld_library_path_lib.ps1'
+[265.147s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/ld_library_path_lib.dsv'
+[265.147s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/hook/ld_library_path_lib.sh'
+[265.148s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/bin'
+[265.148s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/lib/pkgconfig/px4_ros_com.pc'
+[265.149s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/lib/python3.10/site-packages'
+[265.149s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros_com/bin'
+[265.154s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.ps1'
+[265.156s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.dsv'
+[265.157s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.sh'
+[265.157s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.bash'
+[265.158s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros_com/share/px4_ros_com/package.zsh'
+[265.165s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/batoddy/uav_ws/src/install/px4_ros_com/share/colcon-core/packages/px4_ros_com)
+[280.093s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/batoddy/uav_ws/src/build/px4_ros2_cpp' returned '2': AMENT_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/batoddy/uav_ws/src/install/px4_msgs:/home/batoddy/uav_ws/install/px4_ros_com:/home/batoddy/uav_ws/install/px4_msgs:/home/batoddy/install/urdfdom_headers:/home/batoddy/install/gmock_vendor:/home/batoddy/install/gtest_vendor:/home/batoddy/install/ament_cmake_python:/home/batoddy/install/ament_cmake_libraries:/home/batoddy/install/ament_cmake_core:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble LD_LIBRARY_PATH=/home/batoddy/uav_ws/src/install/px4_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/batoddy/uav_ws/src/install/px4_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /home/batoddy/uav_ws/src/build/px4_ros2_cpp -- -j8 -l8
+[280.093s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(px4_ros2_cpp)
+[280.094s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros2_cpp' for CMake module files
+[280.094s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros2_cpp' for CMake config files
+[280.094s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros2_cpp/bin'
+[280.094s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros2_cpp/lib/pkgconfig/px4_ros2_cpp.pc'
+[280.095s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros2_cpp/lib/python3.10/site-packages'
+[280.095s] Level 1:colcon.colcon_core.environment:checking '/home/batoddy/uav_ws/src/install/px4_ros2_cpp/bin'
+[280.095s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros2_cpp/share/px4_ros2_cpp/package.ps1'
+[280.096s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/batoddy/uav_ws/src/install/px4_ros2_cpp/share/px4_ros2_cpp/package.dsv'
+[280.096s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros2_cpp/share/px4_ros2_cpp/package.sh'
+[280.097s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros2_cpp/share/px4_ros2_cpp/package.bash'
+[280.097s] INFO:colcon.colcon_core.shell:Creating package script '/home/batoddy/uav_ws/src/install/px4_ros2_cpp/share/px4_ros2_cpp/package.zsh'
+[280.097s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/batoddy/uav_ws/src/install/px4_ros2_cpp/share/colcon-core/packages/px4_ros2_cpp)
+[280.108s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[280.108s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[280.108s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '2'
+[280.108s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[280.122s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[280.122s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[280.122s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[280.140s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[280.140s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/batoddy/uav_ws/src/install/local_setup.ps1'
+[280.142s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/batoddy/uav_ws/src/install/_local_setup_util_ps1.py'
+[280.144s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/batoddy/uav_ws/src/install/setup.ps1'
+[280.146s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/batoddy/uav_ws/src/install/local_setup.sh'
+[280.146s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/batoddy/uav_ws/src/install/_local_setup_util_sh.py'
+[280.147s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/batoddy/uav_ws/src/install/setup.sh'
+[280.149s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/batoddy/uav_ws/src/install/local_setup.bash'
+[280.149s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/batoddy/uav_ws/src/install/setup.bash'
+[280.150s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/batoddy/uav_ws/src/install/local_setup.zsh'
+[280.151s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/batoddy/uav_ws/src/install/setup.zsh'

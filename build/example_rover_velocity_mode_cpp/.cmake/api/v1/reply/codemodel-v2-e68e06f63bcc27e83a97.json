@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-0ebfbf04529f866f48eb.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "example_rover_velocity_mode_cpp",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "example_rover_velocity_mode_cpp_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-example_rover_velocity_mode_cpp_uninstall-a598a3bbc84840263d9a.json",
+					"name" : "example_rover_velocity_mode_cpp_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rover_velocity_mode::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rover_velocity_mode-9b016048c3d3b6f190a9.json",
+					"name" : "rover_velocity_mode",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-4f04d83bf278b7f89051.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/batoddy/uav_ws/build/example_rover_velocity_mode_cpp",
+		"source" : "/home/batoddy/uav_ws/src/px4-ros2-interface-lib/examples/cpp/modes/rover_velocity"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

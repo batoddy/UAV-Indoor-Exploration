@@ -1,0 +1,2 @@
+source;share/sim_topic_bridge/environment/ament_prefix_path.sh
+source;share/sim_topic_bridge/environment/path.sh

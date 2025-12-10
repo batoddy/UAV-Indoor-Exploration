@@ -1,0 +1,20 @@
+[0.000000] (-) TimerEvent: {}
+[0.001143] (-) JobUnselected: {'identifier': 'example_executor_with_multiple_modes_cpp'}
+[0.001328] (-) JobUnselected: {'identifier': 'example_global_navigation_cpp'}
+[0.001381] (-) JobUnselected: {'identifier': 'example_local_navigation_cpp'}
+[0.001424] (-) JobUnselected: {'identifier': 'example_mode_fw_attitude_cpp'}
+[0.001467] (-) JobUnselected: {'identifier': 'example_mode_goto_cpp'}
+[0.001510] (-) JobUnselected: {'identifier': 'example_mode_goto_global_cpp'}
+[0.001556] (-) JobUnselected: {'identifier': 'example_mode_manual_cpp'}
+[0.001601] (-) JobUnselected: {'identifier': 'example_mode_mission_cpp'}
+[0.001691] (-) JobUnselected: {'identifier': 'example_mode_rtl_replacement_cpp'}
+[0.001750] (-) JobUnselected: {'identifier': 'example_mode_vtol_cpp'}
+[0.001802] (-) JobUnselected: {'identifier': 'example_mode_with_executor_cpp'}
+[0.001895] (-) JobUnselected: {'identifier': 'example_rover_velocity_mode_cpp'}
+[0.002045] (-) JobUnselected: {'identifier': 'px4_example_node'}
+[0.002107] (-) JobUnselected: {'identifier': 'px4_msgs'}
+[0.002151] (-) JobUnselected: {'identifier': 'px4_offboard'}
+[0.002201] (-) JobUnselected: {'identifier': 'px4_ros2_cpp'}
+[0.002256] (-) JobUnselected: {'identifier': 'px4_ros_com'}
+[0.002327] (-) JobUnselected: {'identifier': 'sim_topic_bridge'}
+[0.003030] (-) EventReactorShutdown: {}

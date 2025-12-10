@@ -1,0 +1,11 @@
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/uninstall.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/cmd_vel_to_px4_uninstall.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/cmd_vel_px4_bridge.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/gz_depth_bridge.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/test.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/edit_cache.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/rebuild_cache.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/list_install_components.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/install.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/install/local.dir
+/home/batoddy/uav_ws/build/cmd_vel_to_px4/CMakeFiles/install/strip.dir

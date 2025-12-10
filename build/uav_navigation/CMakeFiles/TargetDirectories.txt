@@ -1,0 +1,10 @@
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/uninstall.dir
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/uav_navigation_uninstall.dir
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/nav2_to_px4_bridge.dir
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/test.dir
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/edit_cache.dir
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/rebuild_cache.dir
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/list_install_components.dir
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/install.dir
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/install/local.dir
+/home/batoddy/uav_ws/build/uav_navigation/CMakeFiles/install/strip.dir

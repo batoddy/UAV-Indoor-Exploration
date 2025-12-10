@@ -1,0 +1,27 @@
+[100%] Built target nav2_to_px4_bridge
+-- Install configuration: ""
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/lib/uav_navigation/nav2_to_px4_bridge
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/config
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/config/nav2_params.yaml
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/config/octomap_params.yaml
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/config/nav2_drone_old.rviz
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/config/nav2_drone.rviz
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/config/nav2_params_old.yaml
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/launch
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/launch/just_viz.launch.py
+-- Installing: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/launch/navigation.launch.py
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/ament_index/resource_index/package_run_dependencies/uav_navigation
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/ament_index/resource_index/parent_prefix_path/uav_navigation
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/environment/ament_prefix_path.sh
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/environment/path.sh
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/environment/path.dsv
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/local_setup.bash
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/local_setup.sh
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/local_setup.zsh
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/local_setup.dsv
+-- Installing: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/package.dsv
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/ament_index/resource_index/packages/uav_navigation
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/cmake/uav_navigationConfig.cmake
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/cmake/uav_navigationConfig-version.cmake
+-- Up-to-date: /home/batoddy/uav_ws/install/uav_navigation/share/uav_navigation/package.xml
