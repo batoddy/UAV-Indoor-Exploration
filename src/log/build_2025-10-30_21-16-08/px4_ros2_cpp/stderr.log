@@ -1,9 +1,0 @@
-In file included from [01m[K/home/batoddy/uav_ws/src/px4-ros2-interface-lib/px4_ros2_cpp/src/control/setpoint_types/fixedwing_lateral_longitudinal.cpp:6[m[K:
-[01m[K/home/batoddy/uav_ws/src/px4-ros2-interface-lib/px4_ros2_cpp/include/px4_ros2/control/setpoint_types/fixedwing_lateral_longitudinal.hpp:8:10:[m[K [01;31m[Kfatal error: [m[Kpx4_msgs/msg/fixed_wing_lateral_setpoint.hpp: No such file or directory
-    8 | #include [01;31m[K<px4_msgs/msg/fixed_wing_lateral_setpoint.hpp>[m[K
-      |          [01;31m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
-compilation terminated.
-gmake[2]: *** [CMakeFiles/px4_ros2_cpp.dir/build.make:244: CMakeFiles/px4_ros2_cpp.dir/src/control/setpoint_types/fixedwing_lateral_longitudinal.cpp.o] Error 1
-gmake[2]: *** Waiting for unfinished jobs....
-gmake[1]: *** [CMakeFiles/Makefile2:163: CMakeFiles/px4_ros2_cpp.dir/all] Error 2
-gmake: *** [Makefile:146: all] Error 2
