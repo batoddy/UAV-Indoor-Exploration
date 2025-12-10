@@ -1,4 +1,0 @@
-source;share/sim_topic_bridge/local_setup.bash
-source;share/sim_topic_bridge/local_setup.dsv
-source;share/sim_topic_bridge/local_setup.sh
-source;share/sim_topic_bridge/local_setup.zsh
