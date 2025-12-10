@@ -1,0 +1,36 @@
+[0.011s] Invoking command in '/home/batoddy/uav_ws/src/build/px4_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake /home/batoddy/uav_ws/src/px4_msgs -DCMAKE_INSTALL_PREFIX=/home/batoddy/uav_ws/src/install/px4_msgs
+[0.020s] -- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.136s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.143s] -- Found builtin_interfaces: 1.2.2 (/opt/ros/humble/share/builtin_interfaces/cmake)
+[0.166s] -- Found rosidl_generator_c: 3.1.7 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.168s] -- Found rosidl_adapter: 3.1.7 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.173s] -- Found rosidl_generator_cpp: 3.1.7 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.183s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.194s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.203s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[1.818s] -- Found ament_cmake_cppcheck: 0.12.14 (/opt/ros/humble/share/ament_cmake_cppcheck/cmake)
+[1.819s] -- Found ament_cmake_cpplint: 0.12.14 (/opt/ros/humble/share/ament_cmake_cpplint/cmake)
+[1.820s] -- Found ament_cmake_uncrustify: 0.12.14 (/opt/ros/humble/share/ament_cmake_uncrustify/cmake)
+[1.822s] -- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)
+[2.211s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[2.366s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[2.391s] -- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+[2.415s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[2.416s] -- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+[2.416s] -- Using PYTHON_LIBRARIES: /usr/lib/x86_64-linux-gnu/libpython3.10.so
+[2.467s] -- Found ament_cmake_flake8: 0.12.14 (/opt/ros/humble/share/ament_cmake_flake8/cmake)
+[2.467s] -- Found ament_cmake_pep257: 0.12.14 (/opt/ros/humble/share/ament_cmake_pep257/cmake)
+[2.512s] -- Configuring done
+[2.858s] -- Generating done
+[2.895s] -- Build files have been written to: /home/batoddy/uav_ws/src/build/px4_msgs
+[2.919s] Invoked command in '/home/batoddy/uav_ws/src/build/px4_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake /home/batoddy/uav_ws/src/px4_msgs -DCMAKE_INSTALL_PREFIX=/home/batoddy/uav_ws/src/install/px4_msgs
+[2.921s] Invoking command in '/home/batoddy/uav_ws/src/build/px4_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake --build /home/batoddy/uav_ws/src/build/px4_msgs -- -j8 -l8
+[3.310s] failed to create symbolic link '/home/batoddy/uav_ws/src/build/px4_msgs/ament_cmake_python/px4_msgs/px4_msgs' because existing path cannot be removed: Is a directory
+[3.311s] gmake[2]: *** [CMakeFiles/ament_cmake_python_symlink_px4_msgs.dir/build.make:70: CMakeFiles/ament_cmake_python_symlink_px4_msgs] Error 1
+[3.311s] gmake[1]: *** [CMakeFiles/Makefile2:421: CMakeFiles/ament_cmake_python_symlink_px4_msgs.dir/all] Error 2
+[3.311s] gmake[1]: *** Waiting for unfinished jobs....
+[3.339s] [35m[1mConsolidate compiler generated dependencies of target px4_msgs__rosidl_generator_c[0m
+[3.343s] [  0%] Built target px4_msgs__cpp
+[3.403s] [ 12%] Built target px4_msgs__rosidl_generator_c
+[3.404s] gmake: *** [Makefile:146: all] Error 2
+[3.407s] Invoked command in '/home/batoddy/uav_ws/src/build/px4_msgs' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/batoddy/uav_ws/install/px4_offboard:/home/batoddy/install/osrf_pycommon:/home/batoddy/install/ament_pyflakes:/home/batoddy/install/ament_pycodestyle:/home/batoddy/install/ament_pep257:/home/batoddy/install/ament_package:/home/batoddy/install/ament_flake8:/home/batoddy/install/ament_lint:/home/batoddy/install/ament_cppcheck:/home/batoddy/orn_ws/install/navslam:/opt/ros/humble /usr/bin/cmake --build /home/batoddy/uav_ws/src/build/px4_msgs -- -j8 -l8

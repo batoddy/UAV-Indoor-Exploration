@@ -1,0 +1,27 @@
+[ 50%] Built target gz_depth_bridge
+[100%] Built target px4_to_ros_bridge
+-- Install configuration: ""
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/lib/sim_topic_bridge/gz_depth_bridge
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/lib/sim_topic_bridge/px4_to_ros_bridge
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/launch
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/launch/octomap_map.launch.py
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/launch/sim_viz.launch.py
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/launch/gz_bridge_launch.launch.py
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/config
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/config/octomap_mapping.rviz
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/config/depth_camera.rviz
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/ament_index/resource_index/package_run_dependencies/sim_topic_bridge
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/ament_index/resource_index/parent_prefix_path/sim_topic_bridge
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/environment/ament_prefix_path.sh
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/environment/path.sh
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/environment/path.dsv
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/local_setup.bash
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/local_setup.sh
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/local_setup.zsh
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/local_setup.dsv
+-- Installing: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/package.dsv
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/ament_index/resource_index/packages/sim_topic_bridge
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/cmake/sim_topic_bridgeConfig.cmake
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/cmake/sim_topic_bridgeConfig-version.cmake
+-- Up-to-date: /home/batoddy/uav_ws/install/sim_topic_bridge/share/sim_topic_bridge/package.xml
