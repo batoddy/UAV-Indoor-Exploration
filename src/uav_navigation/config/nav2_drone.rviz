@@ -288,6 +288,36 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
 
+    # PATH PLANNING bölümüne ekle (Global Path'in altına)
+
+    - Class: rviz_default_plugins/Path
+      Name: Smoothed Global Path
+      Enabled: true
+      Value: true
+      Alpha: 1
+      Buffer Length: 1
+      Color: 255; 128; 0        # Turuncu - smooth path için
+      Head Diameter: 0.1
+      Head Length: 0.05
+      Length: 0.3
+      Line Style: Billboards
+      Line Width: 0.1           # Biraz daha kalın
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.12                 # Global path'in biraz üstünde
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.03
+      Shaft Diameter: 0.05
+      Shaft Length: 0.1
+      Topic:
+        Value: /plan_smoothed    # SMAC smoothed path
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        
     - Class: rviz_default_plugins/Path
       Name: Local Path
       Enabled: true
