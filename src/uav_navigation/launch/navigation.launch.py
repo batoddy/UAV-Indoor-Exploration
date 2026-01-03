@@ -94,41 +94,27 @@ Node(
     output='screen'
 ),
         
-        # Nav2 navigation stack
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(nav2_bringup_dir, 'launch', 'navigation_launch.py')
-            ),
-            launch_arguments={
-                'use_sim_time': use_sim_time,
-                'params_file': nav2_params_file,
-                'autostart': autostart,
-            }.items()
-        ),
-        
-        # # Nav2 to PX4 bridge
-        # Node(
-        #     package='uav_navigation',
-        #     executable='nav2_to_px4_bridge',
-        #     name='nav2_to_px4_bridge',
-        #     parameters=[{
+        # # Nav2 navigation stack
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(
+        #         os.path.join(nav2_bringup_dir, 'launch', 'navigation_launch.py')
+        #     ),
+        #     launch_arguments={
         #         'use_sim_time': use_sim_time,
-        #         'flight_altitude': flight_altitude,
-        #         'velocity_scale': 1.0,
-        #         'cmd_vel_timeout': 0.5,
-        #         'auto_arm': True,
-        #     }],
-        #     output='screen'
+        #         'params_file': nav2_params_file,
+        #         'autostart': autostart,
+        #     }.items()
         # ),
         
-        # RViz (optional - comment out if running separately)
-        Node(
-            package='rviz2',
-            executable='rviz2',
-            name='rviz2',
-            arguments=['-d', os.path.join(pkg_dir, 'config', 'nav2_drone.rviz')],
-            parameters=[{'use_sim_time': use_sim_time}],
-            output='screen'
-        ),
+        
+        # # RViz (optional - comment out if running separately)
+        # Node(
+        #     package='rviz2',
+        #     executable='rviz2',
+        #     name='rviz2',
+        #     arguments=['-d', os.path.join(pkg_dir, 'config', 'nav2_drone.rviz')],
+        #     parameters=[{'use_sim_time': use_sim_time}],
+        #     output='screen'
+        # ),
 
     ])
