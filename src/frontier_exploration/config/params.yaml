@@ -1,0 +1,49 @@
+# Frontier Exploration Parameters
+
+# ============ Node 1: Frontier Detector ============
+frontier_detector:
+  ros__parameters:
+    map_topic: "/map"
+    min_frontier_size: 5       # Min cells for valid cluster
+    max_cluster_size: 50       # Max cells before PCA split
+    free_threshold: 25         # Occupancy < this = free
+    occupied_threshold: 65     # Occupancy >= this = occupied
+    pca_split_threshold: 2.0   # Eigenvalue threshold for splitting
+
+# ============ Node 2: Viewpoint Generator ============
+viewpoint_generator:
+  ros__parameters:
+    # Sensor model
+    sensor_range: 5.0          # Max sensing range (m)
+    sensor_fov_h: 1.57         # Horizontal FOV (~90°)
+    
+    # Cylindrical sampling
+    min_dist: 1.5              # Min distance from cluster (safety buffer)
+    max_dist: 4.0              # Max distance from cluster
+    num_dist_samples: 3        # Radial samples
+    num_angle_samples: 12      # Angular samples (every 30°)
+    
+    # Filtering
+    min_coverage: 3            # Min visible cells
+    max_viewpoints: 5          # Max VPs per cluster
+    
+    free_threshold: 25
+    occupied_threshold: 65
+    
+    # Robot footprint - for collision checking
+    robot_width: 1.0           # [m] Robot width (X axis)
+    robot_length: 1.0          # [m] Robot length (Y axis)
+    robot_height: 0.3          # [m] Robot height (Z axis) - for 3D check
+    safety_margin: 0.3         # [m] Extra clearance around robot
+    
+    # 3D checking parameters
+    flight_height: 1.5         # [m] Nominal flight height
+    height_tolerance: 0.5      # [m] Check obstacles in this Z range
+    
+    # Total clearance = sqrt(0.5² + 0.5²)/2 + 0.3 = 0.65m from obstacles
+
+# ============ Node 3: Cost Computer ============
+cost_computer:
+  ros__parameters:
+    v_max: 2.5                 # Max velocity (m/s)
+    yaw_rate_max: 1.5          # Max yaw rate (rad/s)

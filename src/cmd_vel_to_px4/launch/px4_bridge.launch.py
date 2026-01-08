@@ -5,7 +5,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     return LaunchDescription([
-        DeclareLaunchArgument('takeoff_altitude', default_value='4.0'),
+        DeclareLaunchArgument('takeoff_altitude', default_value='1.5'),
 
         # Odom Converter (PX4 NED -> ROS ENU + TF)
         Node(

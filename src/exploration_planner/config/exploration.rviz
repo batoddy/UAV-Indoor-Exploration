@@ -1,0 +1,206 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+
+Visualization Manager:
+  Class: ""
+  Displays:
+    # ═══════════════════════════════════════════════════════════════════
+    # TF FRAMES
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Name: TF
+      Show Arrows: false
+      Show Axes: true
+      Show Names: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        map:
+          Value: true
+        odom:
+          Value: true
+        base_link:
+          Value: true
+
+    # ═══════════════════════════════════════════════════════════════════
+    # OCTOMAP (3D Voxels)
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: octomap_rviz_plugins/OccupancyGrid
+      Enabled: true
+      Name: OctoMap
+      Topic:
+        Value: /octomap_binary
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+      Alpha: 0.8
+      Max Height: 5.0
+      Min Height: 0.0
+      Voxel Coloring: Z-Axis
+      Voxel Rendering: Occupied Voxels
+
+    # ═══════════════════════════════════════════════════════════════════
+    # COSTMAP (2D with inflation)
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/Map
+      Enabled: true
+      Name: Costmap
+      Topic:
+        Value: /exploration/costmap
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+      Alpha: 0.6
+      Color Scheme: costmap
+      Draw Behind: false
+
+    # ═══════════════════════════════════════════════════════════════════
+    # 2D MAP (SLAM output)
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/Map
+      Enabled: true
+      Name: Map
+      Topic:
+        Value: /map
+        Depth: 5
+        Durability Policy: Transient Local
+        Reliability Policy: Reliable
+      Alpha: 0.5
+      Color Scheme: map
+      Draw Behind: true
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ROBOT FOOTPRINT (Drone box)
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: RobotFootprint
+      Topic:
+        Value: /exploration/robot_footprint
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+
+    # ═══════════════════════════════════════════════════════════════════
+    # PLANNED PATH
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/Path
+      Enabled: true
+      Name: PlannedPath
+      Topic:
+        Value: /exploration/planned_path
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+      Color: 0; 255; 255
+      Line Style: Lines
+      Alpha: 1.0
+      Pose Style: None
+
+    # ═══════════════════════════════════════════════════════════════════
+    # FRONTIER MARKERS
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Frontiers
+      Topic:
+        Value: /frontier_markers
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+
+    # ═══════════════════════════════════════════════════════════════════
+    # EXPLORATION MARKERS (tour, trajectory)
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Exploration
+      Topic:
+        Value: /exploration/markers
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ROBOT POSE (Arrow)
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/Pose
+      Enabled: true
+      Name: RobotPose
+      Topic:
+        Value: /mavros/local_position/pose
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+      Shape: Arrow
+      Color: 0; 255; 0
+      Alpha: 1.0
+      Shaft Length: 0.3
+      Head Length: 0.1
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ODOMETRY (with covariance if available)
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/Odometry
+      Enabled: false
+      Name: Odometry
+      Topic:
+        Value: /odom
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+      Covariance:
+        Orientation: false
+        Position: true
+      Keep: 100
+      Shape: Arrow
+
+    # ═══════════════════════════════════════════════════════════════════
+    # GRID
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/Grid
+      Enabled: true
+      Name: Grid
+      Cell Size: 1
+      Color: 100; 100; 100
+      Line Style:
+        Line Width: 0.02
+        Value: Lines
+      Plane: XY
+      Plane Cell Count: 50
+      Reference Frame: map
+
+  Global Options:
+    Background Color: 30; 30; 30
+    Fixed Frame: map
+    Frame Rate: 30
+
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/SetGoal
+      Topic:
+        Value: /goal_pose
+    - Class: rviz_default_plugins/Measure
+
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 25
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 1
+      Pitch: 0.8
+      Target Frame: map
+      Yaw: 0.785
+
+Window Geometry:
+  Height: 1000
+  Width: 1600
+  X: 100
+  Y: 100

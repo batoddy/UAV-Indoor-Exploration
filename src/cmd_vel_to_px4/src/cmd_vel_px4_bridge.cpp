@@ -1,3 +1,12 @@
+/**
+ * cmd_vel_px4_bridge - Offboard Control with Keep-Alive
+ * 
+ * IMPORTANT: PX4 requires continuous setpoints in offboard mode.
+ * If no setpoint for 500ms, PX4 triggers failsafe (land/RTL).
+ * 
+ * This node ensures setpoints are ALWAYS sent, even without /cmd_vel.
+ */
+
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <px4_msgs/msg/offboard_control_mode.hpp>
@@ -14,8 +23,13 @@ class OffboardControl : public rclcpp::Node
 public:
     OffboardControl() : Node("cmd_vel_px4_bridge")
     {
-        declare_parameter<double>("takeoff_altitude");
+        declare_parameter<double>("takeoff_altitude", 1.5);
+        declare_parameter<double>("cmd_timeout", 0.5);        // Timeout for cmd_vel
+        declare_parameter<double>("hover_timeout", 30.0);     // Max hover time before warning
+        
         takeoff_altitude_ = get_parameter("takeoff_altitude").as_double();
+        cmd_timeout_ = get_parameter("cmd_timeout").as_double();
+        hover_timeout_ = get_parameter("hover_timeout").as_double();
 
         rclcpp::QoS px4_qos(10);
         px4_qos.best_effort();
@@ -27,6 +41,7 @@ public:
                 velocity_ = *msg;
                 last_cmd_time_ = now();
                 has_cmd_ = true;
+                hover_start_time_.reset();  // Reset hover timer
             });
 
         status_sub_ = create_subscription<px4_msgs::msg::VehicleStatus>(
@@ -36,11 +51,19 @@ public:
                 arm_state_ = msg->arming_state;
                 flight_check_ = msg->pre_flight_checks_pass;
                 failsafe_ = msg->failsafe;
+                
+                // Failsafe algılandığında uyar
+                if (failsafe_ && !last_failsafe_) {
+                    RCLCPP_ERROR(get_logger(), "FAILSAFE TRIGGERED! nav_state=%d", nav_state_);
+                }
+                last_failsafe_ = failsafe_;
             });
 
         local_pos_sub_ = create_subscription<px4_msgs::msg::VehicleLocalPosition>(
             "/fmu/out/vehicle_local_position_v1", px4_qos,
             [this](px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
+                pos_x_ = msg->x;
+                pos_y_ = msg->y;
                 pos_z_ = msg->z;
                 yaw_ = msg->heading;
                 has_pos_ = true;
@@ -56,10 +79,11 @@ public:
 
         // Timers
         state_timer_ = create_wall_timer(100ms, [this]() { stateMachine(); });
-        cmd_timer_ = create_wall_timer(20ms, [this]() { cmdLoop(); });
+        cmd_timer_ = create_wall_timer(20ms, [this]() { cmdLoop(); });  // 50Hz - CRITICAL!
 
-        RCLCPP_INFO(get_logger(), "Offboard Control started");
+        RCLCPP_INFO(get_logger(), "Offboard Control started (with keep-alive)");
         RCLCPP_INFO(get_logger(), "  Takeoff altitude: %.1f m", takeoff_altitude_);
+        RCLCPP_INFO(get_logger(), "  Cmd timeout: %.1f s", cmd_timeout_);
     }
 
 private:
@@ -91,11 +115,10 @@ private:
                 break;
 
             case TAKEOFF_PREP:
-                // Offboard mode'a geçmeden önce setpoint gönder
                 publishOffboardMode(true);
                 publishPositionSetpoint(-takeoff_altitude_);
                 
-                if (++counter_ >= 20) {  // 2 saniye
+                if (++counter_ >= 20) {
                     setOffboardMode();
                     state_ = TAKEOFF;
                     counter_ = 0;
@@ -107,19 +130,22 @@ private:
                 publishOffboardMode(true);
                 publishPositionSetpoint(-takeoff_altitude_);
                 
-                // Yüksekliğe ulaştı mı? (NED: z negatif = yukarı)
                 if (-pos_z_ >= takeoff_altitude_ * 0.9) {
                     state_ = OFFBOARD;
                     offboard_mode_ = true;
+                    // Hover pozisyonunu kaydet
+                    hover_x_ = pos_x_;
+                    hover_y_ = pos_y_;
+                    hover_z_ = pos_z_;
                     RCLCPP_INFO(get_logger(), "State: OFFBOARD - Ready for cmd_vel!");
                 }
                 break;
 
             case OFFBOARD:
-                if (!flight_check_ || arm_state_ != 2 || failsafe_) {
+                if (!flight_check_ || arm_state_ != 2) {
                     state_ = IDLE;
                     offboard_mode_ = false;
-                    RCLCPP_WARN(get_logger(), "Back to IDLE");
+                    RCLCPP_WARN(get_logger(), "Back to IDLE (disarmed or check failed)");
                 }
                 break;
         }
@@ -129,39 +155,88 @@ private:
     {
         if (!offboard_mode_ || !has_pos_) return;
 
-        // Velocity control mode
+        // ═══════════════════════════════════════════════════════════════
+        // CRITICAL: Always publish offboard mode to keep PX4 happy
+        // ═══════════════════════════════════════════════════════════════
         px4_msgs::msg::OffboardControlMode mode_msg;
         mode_msg.timestamp = timestamp();
-        mode_msg.position = false;
-        mode_msg.velocity = true;
-        offboard_pub_->publish(mode_msg);
-
-        bool cmd_active = has_cmd_ && (now() - last_cmd_time_).seconds() < 0.5;
+        
+        // Check if we have recent cmd_vel
+        double time_since_cmd = has_cmd_ ? (now() - last_cmd_time_).seconds() : 999.0;
+        bool cmd_active = time_since_cmd < cmd_timeout_;
 
         px4_msgs::msg::TrajectorySetpoint traj_msg;
         traj_msg.timestamp = timestamp();
 
         if (cmd_active) {
-            // Body -> World frame dönüşümü
+            // ═══════════════════════════════════════════════════════════
+            // VELOCITY CONTROL: Use cmd_vel
+            // ═══════════════════════════════════════════════════════════
+            mode_msg.position = false;
+            mode_msg.velocity = true;
+            
+            // Body -> World frame transformation
+            // ROS: X=forward, Y=left, Z=up
+            // PX4 NED: X=north, Y=east, Z=down
             float vx = velocity_.linear.x;
-            float vy = -velocity_.linear.y;
+            float vy = -velocity_.linear.y;  // ROS left -> PX4 right (east)
             float cos_yaw = std::cos(yaw_);
             float sin_yaw = std::sin(yaw_);
 
             traj_msg.velocity[0] = vx * cos_yaw - vy * sin_yaw;
             traj_msg.velocity[1] = vx * sin_yaw + vy * cos_yaw;
-            traj_msg.velocity[2] = -velocity_.linear.z;
+            traj_msg.velocity[2] = -velocity_.linear.z;  // ROS up -> PX4 down
+            
+            // Yaw rate: ROS CCW positive -> PX4 NED CW positive
+            // In NED, positive yaw is clockwise when viewed from above
             traj_msg.yawspeed = -velocity_.angular.z;
+            
+            traj_msg.position = {NAN, NAN, NAN};
+            traj_msg.yaw = NAN;
+            
+            // Debug: Log commanded velocities
+            RCLCPP_DEBUG(get_logger(), 
+                "cmd_vel: vx=%.2f vy=%.2f vz=%.2f yaw_rate=%.2f -> PX4: [%.2f, %.2f, %.2f] yawspeed=%.2f",
+                velocity_.linear.x, velocity_.linear.y, velocity_.linear.z, velocity_.angular.z,
+                traj_msg.velocity[0], traj_msg.velocity[1], traj_msg.velocity[2], traj_msg.yawspeed);
+            
         } else {
-            // Hover
-            traj_msg.velocity[0] = 0.0;
-            traj_msg.velocity[1] = 0.0;
-            traj_msg.velocity[2] = 0.0;
-            traj_msg.yawspeed = 0.0;
+            // ═══════════════════════════════════════════════════════════
+            // POSITION HOLD: No cmd_vel, hold current position
+            // ═══════════════════════════════════════════════════════════
+            mode_msg.position = true;
+            mode_msg.velocity = false;
+            
+            // İlk hover'da pozisyonu kaydet
+            if (!hover_start_time_.has_value()) {
+                hover_start_time_ = now();
+                hover_x_ = pos_x_;
+                hover_y_ = pos_y_;
+                hover_z_ = pos_z_;
+                RCLCPP_WARN(get_logger(), "No cmd_vel - holding position at (%.1f, %.1f, %.1f)",
+                            hover_x_, hover_y_, -hover_z_);
+            }
+            
+            // Hover timeout kontrolü
+            double hover_duration = (now() - *hover_start_time_).seconds();
+            if (hover_duration > hover_timeout_) {
+                RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 10000,
+                    "Hovering for %.0f seconds without cmd_vel!", hover_duration);
+            }
+            
+            // Position hold setpoint
+            traj_msg.position[0] = hover_x_;
+            traj_msg.position[1] = hover_y_;
+            traj_msg.position[2] = hover_z_;
+            traj_msg.velocity = {NAN, NAN, NAN};
+            traj_msg.yaw = NAN;
+            traj_msg.yawspeed = NAN;
         }
 
-        traj_msg.position = {NAN, NAN, NAN};
-        traj_msg.yaw = NAN;
+        // ═══════════════════════════════════════════════════════════════
+        // ALWAYS PUBLISH - This keeps offboard mode alive!
+        // ═══════════════════════════════════════════════════════════════
+        offboard_pub_->publish(mode_msg);
         trajectory_pub_->publish(traj_msg);
     }
 
@@ -214,12 +289,12 @@ private:
 
     uint64_t timestamp() { return get_clock()->now().nanoseconds() / 1000; }
 
-    // Subs
+    // Subscriptions
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
     rclcpp::Subscription<px4_msgs::msg::VehicleStatus>::SharedPtr status_sub_;
     rclcpp::Subscription<px4_msgs::msg::VehicleLocalPosition>::SharedPtr local_pos_sub_;
 
-    // Pubs
+    // Publishers
     rclcpp::Publisher<px4_msgs::msg::OffboardControlMode>::SharedPtr offboard_pub_;
     rclcpp::Publisher<px4_msgs::msg::TrajectorySetpoint>::SharedPtr trajectory_pub_;
     rclcpp::Publisher<px4_msgs::msg::VehicleCommand>::SharedPtr command_pub_;
@@ -231,19 +306,25 @@ private:
     // State
     geometry_msgs::msg::Twist velocity_;
     rclcpp::Time last_cmd_time_;
+    std::optional<rclcpp::Time> hover_start_time_;
     bool has_cmd_ = false;
     bool has_pos_ = false;
     bool offboard_mode_ = false;
 
-    // PX4
+    // PX4 state
     uint8_t nav_state_ = 0;
     uint8_t arm_state_ = 0;
     bool flight_check_ = false;
     bool failsafe_ = false;
-    float pos_z_ = 0;
+    bool last_failsafe_ = false;
+    float pos_x_ = 0, pos_y_ = 0, pos_z_ = 0;
+    float hover_x_ = 0, hover_y_ = 0, hover_z_ = 0;
     float yaw_ = 0;
 
-    double takeoff_altitude_ = 5.0;
+    // Parameters
+    double takeoff_altitude_ = 1.5;
+    double cmd_timeout_ = 0.5;
+    double hover_timeout_ = 30.0;
 };
 
 int main(int argc, char** argv)
@@ -253,5 +334,3 @@ int main(int argc, char** argv)
     rclcpp::shutdown();
     return 0;
 }
-
-// ```## Akış```IDLE → ARMING → TAKEOFF_PREP (2sn setpoint) → TAKEOFF (yükseklik kontrol) → OFFBOARD (cmd_vel)

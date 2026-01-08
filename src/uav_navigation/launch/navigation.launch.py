@@ -53,10 +53,10 @@ Node(
         'base_frame_id': 'base_link',
         
         # ============ SENSÖR MODELİ ============
-        'sensor_model.max_range': 10.0,         # Azaltıldı - uzak noktalar güvenilmez
+        'sensor_model.max_range': 7.0,         # Azaltıldı - uzak noktalar güvenilmez
         'sensor_model.min_range': 0.3,
-        'sensor_model.hit': 0.7,
-        'sensor_model.miss': 0.4,
+        'sensor_model.hit': 0.6,
+        'sensor_model.miss': 0.45,
         'sensor_model.min': 0.12,
         'sensor_model.max': 0.97,
         
@@ -65,14 +65,14 @@ Node(
         'pointcloud_max_z': 10.0,
         
         # ⭐ 2D HARİTAYA PROJEKSİYON
-        'occupancy_min_z': 0.5,               # ⭐ 50cm altı engel sayılmaz
-        'occupancy_max_z': 5.0,
+        'occupancy_min_z': 0.8,               # ⭐ 50cm altı engel sayılmaz
+        'occupancy_max_z': 1.9,              # ⭐ 1.5m üstü engel sayılmaz
         
         # ============ ZEMİN FİLTRELEME ============
         'filter_ground': True,
-        'ground_filter.distance': 0.3,        # ⭐ Zemin algılama mesafesi
-        'ground_filter.angle': 0.25,          # ⭐ Zemin açısı toleransı (~14°)
-        'ground_filter.plane_distance': 0.15, # ⭐ Düzlem toleransı
+        'ground_filter.distance': 0.5,        # ⭐ Zemin algılama mesafesi
+        'ground_filter.angle': 0.35,          # ⭐ Zemin açısı toleransı (~14°)
+        'ground_filter.plane_distance': 0.25, # ⭐ Düzlem toleransı
         
         # ============ GÜRÜLTÜ FİLTRELEME ============
         'filter_speckles': True,
