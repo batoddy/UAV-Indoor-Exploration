@@ -1,36 +1,36 @@
-# ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║                    EXPLORATION PLANNER PARAMETERS                            ║
-# ║                                                                              ║
-# ║  Tüm node'lar bu dosyadan parametre çeker                                   ║
-# ║  Tek bir yerde değiştir, tüm sistem güncellenir                             ║
-# ╚══════════════════════════════════════════════════════════════════════════════╝
+# ==============================================================================
+# EXPLORATION PLANNER PARAMETERS
+# 
+# Tum node'lar bu dosyadan parametre ceker
+# Tek bir yerde degistir, tum sistem guncellenir
+# ==============================================================================
 
 /**:
   ros__parameters:
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # GLOBAL MOTION LIMITS
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     v_max: 2.5               # [m/s] Maximum linear velocitys
     yaw_rate_max: 3.0        # [rad/s] Maximum yaw rate
 
-    a_max: 0.75                    # [m/s²] Max linear acceleration
-    yaw_accel_max: 1.2           # [rad/s²] Max yaw acceleration
+    a_max: 0.7                    # [m/s²] Max linear acceleration
+    yaw_accel_max: 1.0           # [rad/s²] Max yaw acceleration
     
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # ROBOT FOOTPRINT
-    # ═══════════════════════════════════════════════════════════════════════════
-    robot_width: 1.0            # [m] Drone width (X axis)
-    robot_length: 1.0             # [m] Drone length (Y axis)
+    # ==========================================================================
+    robot_width: 1.2            # [m] Drone width (X axis)
+    robot_length: 1.2             # [m] Drone length (Y axis)
     robot_height: 0.3             # [m] Drone height (for visualization)
-    # inscribed_radius = max(width, length) / 2 = 0.25m (otomatik hesaplanır)
+    # inscribed_radius = max(width, length) / 2 = 0.25m (otomatik hesaplanir)
     
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # COSTMAP GENERATOR (OctoMap → 2D Costmap)
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # Height filter: Only obstacles between min_height and max_height are considered
     # Example: UAV flying at 2m, set min=0.5, max=3.0 to see obstacles in flight corridor
     
-    min_height: 0.8            # [m] Below this = ignore (ground)
+    min_height: 1.2            # [m] Below this = ignore (ground)
     max_height: 1.8               # [m] Above this = ignore (too high)
     costmap_resolution: 0.1       # [m] Costmap cell size (smaller = more precise)
     inflation_radius: 1.0         # [m] Total inflation around obstacles
@@ -43,25 +43,25 @@
     inscribed_cost: 99            # Robot center here = collision
     decay_factor: 2.0             # Exponential decay rate (higher = faster decay)
     
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # UNKNOWN AREA HANDLING
-    # ═══════════════════════════════════════════════════════════════════════════
-    # Bilinmeyen alanlara maliyet ver → Drone önce kamerayla görsün, sonra girsin
+    # ==========================================================================
+    # Bilinmeyen alanlara maliyet ver → Drone once kamerayla gorsun, sonra girsin
     #
-    # Maliyet hiyerarşisi:
+    # Maliyet hiyerarsisi:
     #   Lethal (engel):     100
     #   Inscribed:          99
-    #   Unknown (bilinmeyen): 60  ← Drone girmekten kaçınır ama imkansız değil
+    #   Unknown (bilinmeyen): 60  ← Drone girmekten kacinir ama imkansiz degil
     #   Inflation zone:     1-98
     #   Free (serbest):     0
     
     unknown_cost: 60              # [0-100] Bilinmeyen alan maliyeti
-    unknown_inflation_radius: 0.3 # [m] Bilinmeyen alanların şişirilmesi
-    treat_unknown_as_obstacle: true  # Bilinmeyeni engel gibi şişir
+    unknown_inflation_radius: 0.3 # [m] Bilinmeyen alanlarin sisirilmesi
+    treat_unknown_as_obstacle: true  # Bilinmeyeni engel gibi sisir
     
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # PATH PLANNER (A* or RRT)
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     planner_type: "astar"         # "astar" or "rrt"
     obstacle_threshold: 50        # Cost value considered obstacle (0-100)
     path_simplify: true           # Simplify path with line-of-sight check
@@ -75,44 +75,44 @@
     rrt_goal_bias: 0.1            # Probability to sample goal directly
     rrt_goal_threshold: 0.5       # [m] Distance to consider goal reached
     
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # FRONTIER SELECTION (Greedy Selector)
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # cost = w_distance * dist + w_size * (1/size) + w_angle * angle + w_coverage * (1/cov)
     # Lower cost = better frontier
     
-    w_distance: 1.0               # Distance penalty [0.0 - 2.0]
+    w_distance: 1.2               # Distance penalty [0.0 - 2.0]
     w_size: 0.3                   # Small cluster penalty
-    w_angle: 0.75                  # Direction change penalty
-    w_coverage: 0.6               # Low coverage penalty
+    w_angle: 0.55                 # Direction change penalty
+    w_coverage: 0.5               # Low coverage penalty
     max_viewpoints_to_evaluate: 5 # Evaluate top N viewpoints per cluster (not just best)
     
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # LOCAL REFINER
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     refine_radius: 5.0            # [m] Refinement radius
     max_refine_clusters: 3        # Max clusters to refine
     w_consistency: 0.5            # Motion consistency weight
     
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # TRAJECTORY GENERATOR
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     traj_dt: 0.1                  # [s] Trajectory time step
     lookahead_time: 3.0           # [s] Max trajectory duration
     min_waypoint_dist: 0.2        # [m] Min distance between waypoints
     
     # Smooth Yaw Distribution Along Path
-    # Path boyunca yaw'ı smooth şekilde dağıtır:
-    #   İlk X metre: current_yaw → movement_direction (path yönüne dön)
-    #   Orta kısım: movement_direction (path boyunca düz git)  
-    #   Son Y metre: movement_direction → target_yaw (frontier'a dön)
-    # Kısa path'lerde otomatik olarak ölçeklenir
-    yaw_initial_blend_dist: 1.0   # [m] Path yönüne dönme mesafesi
-    yaw_final_blend_dist: 2.5     # [m] Frontier'a dönme mesafesi
+    # Path boyunca yaw'i smooth sekilde dagitir:
+    #   Ilk X metre: current_yaw → movement_direction (path yonune don)
+    #   Orta kisim: movement_direction (path boyunca duz git)  
+    #   Son Y metre: movement_direction → target_yaw (frontier'a don)
+    # Kisa path'lerde otomatik olarak olceklenir
+    yaw_initial_blend_dist: 1.0   # [m] Path yonune donme mesafesi
+    yaw_final_blend_dist: 2.5     # [m] Frontier'a donme mesafesi
     
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # TRAJECTORY FOLLOWER (Smooth Motion)
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     control_rate: 30.0            # [Hz] Control loop frequency
     goal_tolerance_xy: 0.25       # [m] Position tolerance (tighter: 25cm)
     goal_tolerance_yaw: 0.15      # [rad] Yaw tolerance (~8.5 deg)
@@ -127,15 +127,23 @@
     min_approach_speed: 0.3       # [m/s] Minimum speed when approaching
     
     # Progressive Yaw - Trajectory follower'da ek yaw smoothing
-    # (trajectory_generator zaten smooth yaw üretiyor, bu ekstra refinement)
-    progressive_yaw_distance: 2.5 # [m] Bu mesafede dönmeye başla
-    progressive_yaw_blend: 0.7    # 0=hareket yönü, 1=hedef yaw (blend faktörü)
+    # (trajectory_generator zaten smooth yaw uretiyor, bu ekstra refinement)
+    progressive_yaw_distance: 2.5 # [m] Bu mesafede donmeye basla
+    progressive_yaw_blend: 0.7    # 0=hareket yonu, 1=hedef yaw (blend faktoru)
     
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ==========================================================================
     # HEIGHT CONTROL
-    # ═══════════════════════════════════════════════════════════════════════════
-    # Drone'un sabit yükseklikte kalmasını sağlar
-    target_height: 1.5            # [m] Hedef uçuş yüksekliği
-    height_tolerance: 0.2         # [m] Kabul edilebilir yükseklik hatası
+    # ==========================================================================
+    # Drone'un sabit yukseklikte kalmasini saglar
+    target_height: 1.5            # [m] Hedef ucus yuksekligi
+    height_tolerance: 0.2         # [m] Kabul edilebilir yukseklik hatasi
     kp_z: 1.0                     # Z ekseni proportional gain
-    vz_max: 1.0                   # [m/s] Maksimum dikey hız
+    vz_max: 1.0                   # [m/s] Maksimum dikey hiz
+
+    # ==========================================================================
+    # PATH TRAIL VISUALIZATION
+    # ==========================================================================
+    # Drone'un gectigi yolu RViz'de turuncu cizgi olarak gosterir
+    trail_enabled: true           # Trail gorsellestirmesini aktif et
+    trail_max_points: 5000        # Maksimum trail nokta sayisi (FIFO)
+    trail_min_distance: 0.1       # [m] Trail noktalari arasi minimum mesafe

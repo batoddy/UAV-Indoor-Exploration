@@ -4,20 +4,25 @@
  * Input:  /exploration/global_tour
  *         /exploration/refined_tour
  *         /exploration/trajectory
- *         /odom (for robot footprint)
+ *         /odom (for robot footprint and trajectory history)
  * Output: /exploration/markers (visualization_msgs/MarkerArray)
  *         /exploration/robot_footprint (visualization_msgs/Marker)
+ *         /exploration/trajectory_history (visualization_msgs/Marker)
  * 
  * Visualizes the exploration plan in RViz.
+ * Now includes ORANGE trajectory history showing where the drone has been!
  */
 
 #include <rclcpp/rclcpp.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <nav_msgs/msg/path.hpp>
 #include "exploration_planner/msg/exploration_status.hpp"
 #include "exploration_planner/msg/trajectory.hpp"
 #include "exploration_planner/common.hpp"
+
+#include <deque>
 
 using namespace exploration_planner;
 
@@ -31,17 +36,15 @@ public:
     declare_parameter("robot_length", 0.5);
     declare_parameter("robot_height", 0.2);  // Visual height of drone box
     
-    // Path trail parameters
-    declare_parameter("trail_enabled", true);
-    declare_parameter("trail_max_points", 5000);  // Max trail points to keep
-    declare_parameter("trail_min_distance", 0.1); // [m] Min distance between trail points
+    // Trajectory history parameters
+    declare_parameter("trajectory_history_length", 1000);  // Max points to keep
+    declare_parameter("trajectory_history_min_dist", 0.1); // Min distance between points [m]
     
     robot_width_ = get_parameter("robot_width").as_double();
     robot_length_ = get_parameter("robot_length").as_double();
     robot_height_ = get_parameter("robot_height").as_double();
-    trail_enabled_ = get_parameter("trail_enabled").as_bool();
-    trail_max_points_ = get_parameter("trail_max_points").as_int();
-    trail_min_distance_ = get_parameter("trail_min_distance").as_double();
+    trajectory_history_length_ = get_parameter("trajectory_history_length").as_int();
+    trajectory_history_min_dist_ = get_parameter("trajectory_history_min_dist").as_double();
     
     // Subscribers
     global_tour_sub_ = create_subscription<exploration_planner::msg::ExplorationStatus>(
@@ -67,16 +70,23 @@ public:
     footprint_pub_ = create_publisher<visualization_msgs::msg::Marker>(
       "/exploration/robot_footprint", 10);
     
-    // Timer to publish footprint regularly
+    trajectory_history_pub_ = create_publisher<visualization_msgs::msg::Marker>(
+      "/exploration/trajectory_history", 10);
+    
+    // Also publish as nav_msgs/Path for easy recording
+    path_history_pub_ = create_publisher<nav_msgs::msg::Path>(
+      "/exploration/path_history", 10);
+    
+    // Timer to publish footprint and trajectory history regularly
     footprint_timer_ = create_wall_timer(
       std::chrono::milliseconds(100),
-      std::bind(&ExplorationVisualizerNode::publishFootprint, this));
+      std::bind(&ExplorationVisualizerNode::publishFootprintAndHistory, this));
     
     RCLCPP_INFO(get_logger(), "Exploration Visualizer initialized");
     RCLCPP_INFO(get_logger(), "  Robot footprint: %.2f x %.2f x %.2f m", 
                 robot_width_, robot_length_, robot_height_);
-    RCLCPP_INFO(get_logger(), "  Trail: %s (max: %d pts, min_dist: %.2f m)", 
-                trail_enabled_ ? "enabled" : "disabled", trail_max_points_, trail_min_distance_);
+    RCLCPP_INFO(get_logger(), "  Trajectory history: max %d points, min dist %.2fm",
+                trajectory_history_length_, trajectory_history_min_dist_);
   }
 
 private:
@@ -85,10 +95,38 @@ private:
     current_pose_ = msg->pose.pose;
     have_pose_ = true;
     
-    // Add to trail if enabled
-    if (trail_enabled_) {
-      addTrailPoint(msg->pose.pose.position);
+    // Add to trajectory history if moved enough
+    addToTrajectoryHistory(msg->pose.pose.position);
+  }
+  
+  void addToTrajectoryHistory(const geometry_msgs::msg::Point& pos)
+  {
+    // Check if we've moved enough from the last point
+    if (!trajectory_history_.empty()) {
+      const auto& last = trajectory_history_.back();
+      double dist = std::sqrt(
+        std::pow(pos.x - last.x, 2) + 
+        std::pow(pos.y - last.y, 2) + 
+        std::pow(pos.z - last.z, 2));
+      
+      if (dist < trajectory_history_min_dist_) {
+        return;  // Haven't moved enough
+      }
     }
+    
+    // Add new point
+    trajectory_history_.push_back(pos);
+    
+    // Trim if too long
+    while (static_cast<int>(trajectory_history_.size()) > trajectory_history_length_) {
+      trajectory_history_.pop_front();
+    }
+  }
+  
+  void publishFootprintAndHistory()
+  {
+    publishFootprint();
+    publishTrajectoryHistory();
   }
   
   void publishFootprint()
@@ -121,28 +159,50 @@ private:
     footprint_pub_->publish(footprint);
   }
   
-  void addTrailPoint(const geometry_msgs::msg::Point& position)
+  void publishTrajectoryHistory()
   {
-    // Check if we should add a new point (min distance criterion)
-    if (!trail_points_.empty()) {
-      const auto& last = trail_points_.back();
-      double dx = position.x - last.x;
-      double dy = position.y - last.y;
-      double dz = position.z - last.z;
-      double dist = std::sqrt(dx*dx + dy*dy + dz*dz);
-      
-      if (dist < trail_min_distance_) {
-        return;  // Too close to last point
-      }
+    if (trajectory_history_.size() < 2) return;
+    
+    // Publish as LINE_STRIP marker (ORANGE)
+    visualization_msgs::msg::Marker history_marker;
+    history_marker.header.stamp = now();
+    history_marker.header.frame_id = "map";
+    history_marker.ns = "trajectory_history";
+    history_marker.id = 0;
+    history_marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
+    history_marker.action = visualization_msgs::msg::Marker::ADD;
+    
+    history_marker.scale.x = 0.05;  // Line width
+    
+    // ORANGE color
+    history_marker.color.r = 1.0;
+    history_marker.color.g = 0.5;
+    history_marker.color.b = 0.0;
+    history_marker.color.a = 0.8;
+    
+    history_marker.lifetime = rclcpp::Duration::from_seconds(0.0);  // Persistent
+    
+    // Add all points
+    for (const auto& pt : trajectory_history_) {
+      history_marker.points.push_back(pt);
     }
     
-    // Add new point
-    trail_points_.push_back(position);
+    trajectory_history_pub_->publish(history_marker);
     
-    // Limit trail size (FIFO)
-    if (static_cast<int>(trail_points_.size()) > trail_max_points_) {
-      trail_points_.erase(trail_points_.begin());
+    // Also publish as nav_msgs/Path
+    nav_msgs::msg::Path path_msg;
+    path_msg.header.stamp = now();
+    path_msg.header.frame_id = "map";
+    
+    for (const auto& pt : trajectory_history_) {
+      geometry_msgs::msg::PoseStamped pose;
+      pose.header = path_msg.header;
+      pose.pose.position = pt;
+      pose.pose.orientation.w = 1.0;
+      path_msg.poses.push_back(pose);
     }
+    
+    path_history_pub_->publish(path_msg);
   }
   
   void globalTourCallback(const exploration_planner::msg::ExplorationStatus::SharedPtr msg)
@@ -180,29 +240,6 @@ private:
     }
     
     auto stamp = now();
-    
-    // === Path Trail (turuncu - orange) ===
-    if (trail_enabled_ && !trail_points_.empty()) {
-      visualization_msgs::msg::Marker trail;
-      trail.header.frame_id = frame;
-      trail.header.stamp = stamp;
-      trail.ns = "path_trail";
-      trail.id = id++;
-      trail.type = visualization_msgs::msg::Marker::LINE_STRIP;
-      trail.action = visualization_msgs::msg::Marker::ADD;
-      trail.scale.x = 0.05;  // Line width
-      
-      // Orange color (turuncu)
-      trail.color.r = 1.0;
-      trail.color.g = 0.5;
-      trail.color.b = 0.0;
-      trail.color.a = 0.8;
-      
-      trail.points = trail_points_;
-      markers.markers.push_back(trail);
-      
-      RCLCPP_DEBUG(get_logger(), "Trail: %zu points", trail_points_.size());
-    }
     
     // === Global Tour (dashed line, yellow) ===
     if (global_tour_ && !global_tour_->waypoints.empty()) {
@@ -395,11 +432,8 @@ private:
   double robot_width_;
   double robot_length_;
   double robot_height_;
-  
-  // Trail parameters
-  bool trail_enabled_;
-  int trail_max_points_;
-  double trail_min_distance_;
+  int trajectory_history_length_;
+  double trajectory_history_min_dist_;
   
   // State
   exploration_planner::msg::ExplorationStatus::SharedPtr global_tour_;
@@ -408,8 +442,8 @@ private:
   geometry_msgs::msg::Pose current_pose_;
   bool have_pose_ = false;
   
-  // Trail data
-  std::vector<geometry_msgs::msg::Point> trail_points_;
+  // Trajectory history (where drone has been)
+  std::deque<geometry_msgs::msg::Point> trajectory_history_;
   
   // ROS
   rclcpp::Subscription<exploration_planner::msg::ExplorationStatus>::SharedPtr global_tour_sub_;
@@ -418,6 +452,8 @@ private:
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr footprint_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr trajectory_history_pub_;
+  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_history_pub_;
   rclcpp::TimerBase::SharedPtr footprint_timer_;
 };
 

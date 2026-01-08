@@ -74,7 +74,7 @@ Visualization Manager:
       Draw Behind: true
 
     # ═══════════════════════════════════════════════════════════════════
-    # ROBOT FOOTPRINT (3D Box showing drone size)
+    # ROBOT FOOTPRINT (Drone box)
     # ═══════════════════════════════════════════════════════════════════
     - Class: rviz_default_plugins/Marker
       Enabled: true
@@ -86,7 +86,7 @@ Visualization Manager:
         Reliability Policy: Reliable
 
     # ═══════════════════════════════════════════════════════════════════
-    # PLANNED PATH (from path planner)
+    # PLANNED PATH
     # ═══════════════════════════════════════════════════════════════════
     - Class: rviz_default_plugins/Path
       Enabled: true
@@ -114,20 +114,11 @@ Visualization Manager:
         Reliability Policy: Reliable
 
     # ═══════════════════════════════════════════════════════════════════
-    # EXPLORATION MARKERS (tour, trajectory, trail)
+    # EXPLORATION MARKERS (tour, trajectory)
     # ═══════════════════════════════════════════════════════════════════
-    # Bu topic şunları içerir:
-    #   - path_trail: Drone'un geçtiği yol (TURUNCU LINE_STRIP)
-    #   - global_tour: Global frontier tour (SARI LINE_STRIP)
-    #   - global_waypoints: Waypoint spheres (SARI)
-    #   - waypoint_labels: Waypoint numaraları (TEXT)
-    #   - refined_tour: Refined local tour (CYAN LINE_STRIP)
-    #   - trajectory: Current trajectory (YEŞİL LINE_STRIP)
-    #   - velocity_arrows: Trajectory hız vektörleri (ARROWS)
-    #   - status: Exploration durumu metni (TEXT)
     - Class: rviz_default_plugins/MarkerArray
       Enabled: true
-      Name: Exploration Markers
+      Name: Exploration
       Topic:
         Value: /exploration/markers
         Depth: 5
