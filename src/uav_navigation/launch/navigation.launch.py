@@ -53,7 +53,7 @@ Node(
         'base_frame_id': 'base_link',
         
         # ============ SENSÖR MODELİ ============
-        'sensor_model.max_range': 5.0,         # Azaltıldı - uzak noktalar güvenilmez
+        'sensor_model.max_range': 7.0,         # Azaltıldı - uzak noktalar güvenilmez
         'sensor_model.min_range': 0.3,
         'sensor_model.hit': 0.55,              # 0.6'dan düşür - tek ölçümde daha az güven
         'sensor_model.miss': 0.40,             # 0.45'den düşür - boş alan daha agresif temizlesin

@@ -25,8 +25,8 @@ public:
   CostComputerNode() : Node("cost_computer")
   {
     // Parameters
-    declare_parameter("v_max", 1.0);
-    declare_parameter("yaw_rate_max", 1.0);
+    declare_parameter("v_max", 2.5);
+    declare_parameter("yaw_rate_max", 3.0);
     
     v_max_ = get_parameter("v_max").as_double();
     yaw_rate_max_ = get_parameter("yaw_rate_max").as_double();

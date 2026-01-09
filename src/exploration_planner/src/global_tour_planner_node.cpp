@@ -23,6 +23,8 @@
 #include "frontier_exploration/msg/frontier_array.hpp"
 #include "exploration_planner/msg/exploration_status.hpp"
 #include "exploration_planner/common.hpp"
+#include <nav_msgs/msg/occupancy_grid.hpp>
+
 
 using namespace exploration_planner;
 
@@ -79,6 +81,16 @@ public:
       "/exploration/stop",
       std::bind(&GreedyFrontierSelectorNode::stopCallback, this,
                 std::placeholders::_1, std::placeholders::_2));
+
+    costmap_sub_ =
+        this->create_subscription<nav_msgs::msg::OccupancyGrid>(
+          "/global_costmap/costmap",
+          rclcpp::QoS(1).transient_local(),
+          [this](const nav_msgs::msg::OccupancyGrid::SharedPtr msg)
+          {
+            costmap_ = msg;
+          });
+
     
     RCLCPP_INFO(get_logger(), "Greedy Frontier Selector initialized");
     RCLCPP_INFO(get_logger(), "  Cost weights: dist=%.2f, size=%.2f, angle=%.2f, coverage=%.2f",
@@ -306,6 +318,10 @@ private:
   bool have_pose_ = false;
   bool exploration_active_ = false;
   
+  nav_msgs::msg::OccupancyGrid::SharedPtr costmap_;
+  rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_sub_;
+
+
   // ROS
   rclcpp::Subscription<frontier_exploration::msg::FrontierArray>::SharedPtr clusters_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;

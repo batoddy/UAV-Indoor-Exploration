@@ -31,11 +31,6 @@ def generate_launch_description():
             parameters=[{
                 'use_sim_time': use_sim_time,
                 'map_topic': map_topic,
-                'min_frontier_size': 5,
-                'max_cluster_size': 50,
-                'free_threshold': 25,
-                'occupied_threshold': 65,
-                'pca_split_threshold': 2.0,
             }],
             output='screen'
         ),
@@ -47,16 +42,6 @@ def generate_launch_description():
             name='viewpoint_generator',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'sensor_range': 5.0,
-                'sensor_fov_h': 1.57,
-                'min_dist': 1.0,
-                'max_dist': 4.0,
-                'num_dist_samples': 3,
-                'num_angle_samples': 12,
-                'min_coverage': 3,
-                'max_viewpoints': 5,
-                'free_threshold': 25,
-                'occupied_threshold': 65,
             }],
             output='screen'
         ),
@@ -68,8 +53,6 @@ def generate_launch_description():
             name='cost_computer',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'v_max': 1.0,
-                'yaw_rate_max': 1.0,
             }],
             output='screen'
         ),

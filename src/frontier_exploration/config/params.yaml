@@ -5,7 +5,7 @@ frontier_detector:
   ros__parameters:
     map_topic: "/map"
     min_frontier_size: 5       # Min cells for valid cluster
-    max_cluster_size: 50       # Max cells before PCA split
+    max_cluster_size: 20      # Max cells before PCA split
     free_threshold: 25         # Occupancy < this = free
     occupied_threshold: 65     # Occupancy >= this = occupied
     pca_split_threshold: 2.0   # Eigenvalue threshold for splitting
@@ -14,12 +14,12 @@ frontier_detector:
 viewpoint_generator:
   ros__parameters:
     # Sensor model
-    sensor_range: 5.0          # Max sensing range (m)
+    sensor_range: 3.0          # Max sensing range (m)
     sensor_fov_h: 1.57         # Horizontal FOV (~90°)
     
     # Cylindrical sampling
     min_dist: 1.5              # Min distance from cluster (safety buffer)
-    max_dist: 4.0              # Max distance from cluster
+    max_dist: 3.0              # Max distance from cluster
     num_dist_samples: 3        # Radial samples
     num_angle_samples: 12      # Angular samples (every 30°)
     
