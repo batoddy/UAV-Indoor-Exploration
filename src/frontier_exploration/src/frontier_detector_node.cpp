@@ -15,6 +15,8 @@
 
 #include <queue>
 #include <algorithm>
+#include <climits>
+
 
 using namespace frontier_exploration;
 
