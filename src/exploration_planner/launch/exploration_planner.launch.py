@@ -1,12 +1,9 @@
 """
-Exploration Planner - Full Pipeline Launch
-
-Tüm parametreler config/params.yaml dosyasından çekilir.
+Exploration Planner - Full Pipeline Launch with Nav2
 
 Usage:
   ros2 launch exploration_planner exploration_planner.launch.py
   ros2 launch exploration_planner exploration_planner.launch.py rviz:=true
-  ros2 launch exploration_planner exploration_planner.launch.py planner:=rrt
 """
 
 from launch import LaunchDescription
@@ -21,27 +18,45 @@ import os
 def generate_launch_description():
     pkg_dir = get_package_share_directory('exploration_planner')
     params_file = os.path.join(pkg_dir, 'config', 'params.yaml')
+    nav2_params_file = os.path.join(pkg_dir, 'config', 'nav2_params.yaml')
     rviz_config = os.path.join(pkg_dir, 'config', 'exploration.rviz')
-    
-    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     rviz = LaunchConfiguration('rviz', default='false')
-    planner = LaunchConfiguration('planner', default='astar')
-    
+
     return LaunchDescription([
-        DeclareLaunchArgument('use_sim_time', default_value='false'),
+        DeclareLaunchArgument('use_sim_time', default_value='true'),
         DeclareLaunchArgument('rviz', default_value='false', description='Launch RViz'),
-        DeclareLaunchArgument('planner', default_value='astar', description='Path planner: astar or rrt'),
-        
-        # Node 0: Costmap Generator (OctoMap → 2D)
+
+        # ============================================================
+        # NAV2 PLANNER SERVER (includes global costmap)
+        # ============================================================
         Node(
-            package='exploration_planner',
-            executable='costmap_generator_node',
-            name='costmap_generator',
-            parameters=[params_file, {'use_sim_time': use_sim_time}],
+            package='nav2_planner',
+            executable='planner_server',
+            name='planner_server',
+            parameters=[nav2_params_file, {'use_sim_time': use_sim_time}],
             output='screen'
         ),
-        
-        # Node 1: Greedy Frontier Selector
+
+        # Nav2 Lifecycle Manager
+        Node(
+            package='nav2_lifecycle_manager',
+            executable='lifecycle_manager',
+            name='lifecycle_manager_planner',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'autostart': True,
+                'node_names': ['planner_server']
+            }],
+            output='screen'
+        ),
+
+        # ============================================================
+        # EXPLORATION NODES
+        # ============================================================
+
+        # Greedy Frontier Selector
         Node(
             package='exploration_planner',
             executable='global_tour_planner_node',
@@ -49,26 +64,26 @@ def generate_launch_description():
             parameters=[params_file, {'use_sim_time': use_sim_time}],
             output='screen'
         ),
-        
-        # Node 2: Path Planner (A* or RRT)
+
+        # Nav2 Path Planner Node (our wrapper)
         Node(
             package='exploration_planner',
-            executable='path_planner_node',
-            name='path_planner',
-            parameters=[params_file, {'use_sim_time': use_sim_time, 'planner_type': planner}],
-            output='screen'
-        ),
-        
-        # Node 3: Local Viewpoint Refiner
-        Node(
-            package='exploration_planner',
-            executable='local_refiner_node',
-            name='local_refiner',
+            executable='nav2_path_planner_node',
+            name='nav2_path_planner',
             parameters=[params_file, {'use_sim_time': use_sim_time}],
             output='screen'
         ),
-        
-        # Node 4: Trajectory Generator
+
+        # Path Yaw Injector
+        Node(
+            package='exploration_planner',
+            executable='path_yaw_injector_node',
+            name='path_yaw_injector',
+            parameters=[params_file, {'use_sim_time': use_sim_time}],
+            output='screen'
+        ),
+
+        # Trajectory Generator
         Node(
             package='exploration_planner',
             executable='trajectory_generator_node',
@@ -76,8 +91,8 @@ def generate_launch_description():
             parameters=[params_file, {'use_sim_time': use_sim_time}],
             output='screen'
         ),
-        
-        # Node 5: Trajectory Follower
+
+        # Trajectory Follower
         Node(
             package='exploration_planner',
             executable='trajectory_follower_node',
@@ -85,8 +100,8 @@ def generate_launch_description():
             parameters=[params_file, {'use_sim_time': use_sim_time}],
             output='screen'
         ),
-        
-        # Node 6: Visualizer
+
+        # Visualizer
         Node(
             package='exploration_planner',
             executable='exploration_visualizer_node',
@@ -94,8 +109,12 @@ def generate_launch_description():
             parameters=[{'use_sim_time': use_sim_time}],
             output='screen'
         ),
-        
-        # RViz (optional)
+
+        # ============================================================
+        # OPTIONAL
+        # ============================================================
+
+        # RViz
         Node(
             package='rviz2',
             executable='rviz2',

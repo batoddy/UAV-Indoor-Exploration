@@ -10,11 +10,11 @@
     # ==========================================================================
     # GLOBAL MOTION LIMITS
     # ==========================================================================
-    v_max: 2.5               # [m/s] Maximum linear velocitys
+    v_max: 2.5               # [m/s] Maximum linear velocity
     yaw_rate_max: 3.0        # [rad/s] Maximum yaw rate
 
-    a_max: 0.7                    # [m/s²] Max linear acceleration
-    yaw_accel_max: 1.0           # [rad/s²] Max yaw acceleration
+    a_max: 0.9                   # [m/s²] Max linear acceleration (was 0.7, now faster)
+    yaw_accel_max: 1.5           # [rad/s²] Max yaw acceleration (was 1.0)
     
     # ==========================================================================
     # ROBOT FOOTPRINT
@@ -82,9 +82,9 @@
     # Lower cost = better frontier
     
     w_distance: 1.2               # Distance penalty [0.0 - 2.0]
-    w_size: 0.3                   # Small cluster penalty
+    w_size: 0.1                   # Small cluster penalty
     w_angle: 0.55                 # Direction change penalty
-    w_coverage: 0.5               # Low coverage penalty
+    w_coverage: 0.3               # Low coverage penalty
     max_viewpoints_to_evaluate: 5 # Evaluate top N viewpoints per cluster (not just best)
     
     # ==========================================================================
@@ -116,15 +116,15 @@
     control_rate: 30.0            # [Hz] Control loop frequency
     goal_tolerance_xy: 0.25       # [m] Position tolerance (tighter: 25cm)
     goal_tolerance_yaw: 0.15      # [rad] Yaw tolerance (~8.5 deg)
-    
-    # Gains - LOWERED for smooth motion
-    kp_linear: 0.8                # Position proportional gain (was 2.0)
-    kp_yaw: 1.2                   # Yaw proportional gain (was 3.0)
-    
+
+    # Gains - INCREASED for faster response
+    kp_linear: 1.8                # Position proportional gain (was 0.8, now faster)
+    kp_yaw: 1.5                   # Yaw proportional gain
+
     # Smoothing parameters
-    velocity_smoothing: 0.3       # Exponential smoothing (0-1, higher = smoother)
-    slowdown_distance: 2.0        # [m] Start slowing at this distance
-    min_approach_speed: 0.3       # [m/s] Minimum speed when approaching
+    velocity_smoothing: 0.2       # Exponential smoothing (0-1, lower = more responsive)
+    slowdown_distance: 1.0        # [m] Start slowing closer to goal (was 2.0)
+    min_approach_speed: 0.4       # [m/s] Minimum speed when approaching
     
     # Progressive Yaw - Trajectory follower'da ek yaw smoothing
     # (trajectory_generator zaten smooth yaw uretiyor, bu ekstra refinement)

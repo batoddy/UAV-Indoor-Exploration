@@ -46,17 +46,12 @@ ament_target_dependencies(frontier_detector_node ${COMMON_DEPS})
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 target_link_libraries(frontier_detector_node "${cpp_typesupport_target}")
 
-# ============ Node 2: Viewpoint Generator (with OctoMap) ============
+# ============ Node 2: Viewpoint Generator (Feature-rich + Occlusion-aware + Stabilized) ============
 add_executable(viewpoint_generator_node src/viewpoint_generator_node.cpp)
 ament_target_dependencies(viewpoint_generator_node ${COMMON_DEPS} octomap_msgs)
 target_link_libraries(viewpoint_generator_node "${cpp_typesupport_target}" ${OCTOMAP_LIBRARIES})
 
-# ============ Node 3: Cost Computer ============
-add_executable(cost_computer_node src/cost_computer_node.cpp)
-ament_target_dependencies(cost_computer_node ${COMMON_DEPS})
-target_link_libraries(cost_computer_node "${cpp_typesupport_target}")
-
-# ============ Node 4: Frontier Visualizer ============
+# ============ Node 3: Frontier Visualizer ============
 add_executable(frontier_visualizer_node src/frontier_visualizer_node.cpp)
 ament_target_dependencies(frontier_visualizer_node ${COMMON_DEPS})
 target_link_libraries(frontier_visualizer_node "${cpp_typesupport_target}")
@@ -65,7 +60,6 @@ target_link_libraries(frontier_visualizer_node "${cpp_typesupport_target}")
 install(TARGETS
   frontier_detector_node
   viewpoint_generator_node
-  cost_computer_node
   frontier_visualizer_node
   DESTINATION lib/${PROJECT_NAME}
 )

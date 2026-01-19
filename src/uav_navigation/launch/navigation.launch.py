@@ -53,8 +53,8 @@ Node(
         'base_frame_id': 'base_link',
         
         # ============ SENSÖR MODELİ ============
-        'sensor_model.max_range': 7.0,         # Azaltıldı - uzak noktalar güvenilmez
-        'sensor_model.min_range': 0.3,
+        'sensor_model.max_range': 7.5,         # Azaltıldı - uzak noktalar güvenilmez
+        'sensor_model.min_range': 0.1,
         'sensor_model.hit': 0.55,              # 0.6'dan düşür - tek ölçümde daha az güven
         'sensor_model.miss': 0.40,             # 0.45'den düşür - boş alan daha agresif temizlesin
         'sensor_model.min': 0.12,              # Aynı kalabilir
@@ -65,28 +65,30 @@ Node(
         'filter_speckles_size': 5,             # Ekle - izole vokselleri temizle
         
         # ============ Z EKSENİ FİLTRELEME ============
-        'pointcloud_min_z': -1.0,
+        'pointcloud_min_z': -0.5,
         'pointcloud_max_z': 10.0,
         
         # ⭐ 2D HARİTAYA PROJEKSİYON
         'occupancy_min_z': 0.8,               # ⭐ 50cm altı engel sayılmaz
-        'occupancy_max_z': 1.9,              # ⭐ 1.5m üstü engel sayılmaz
+        'occupancy_max_z': 2.0,              # ⭐ 1.5m üstü engel sayılmaz
         
         # ============ ZEMİN FİLTRELEME ============
         'filter_ground': True,
         'ground_filter.distance': 0.5,        # ⭐ Zemin algılama mesafesi
         'ground_filter.angle': 0.35,          # ⭐ Zemin açısı toleransı (~14°)
         'ground_filter.plane_distance': 0.25, # ⭐ Düzlem toleransı
-        
-        # ============ GÜRÜLTÜ FİLTRELEME ============
-        'filter_speckles': True,
-        
+               
         # ============ YAYINLAMA AYARLARI ============
         'latch': True,
         'publish_free_space': True,
+        'publish_unknown_space': True,
         'height_map': True,
         'colored_map': False,
-        'incremental_2D_projection': False,
+        # 'incremental_2D_projection': True,
+
+        # ⭐ EXPAND SETTINGS (YENİ)
+        'automatic_expansion': True,          
+        'expand_rate': 10.0,           
     }],
     remappings=[
         ('cloud_in', '/camera/points'),
@@ -97,28 +99,5 @@ Node(
     ],
     output='screen'
 ),
-        
-        # # Nav2 navigation stack
-        # IncludeLaunchDescription(
-        #     PythonLaunchDescriptionSource(
-        #         os.path.join(nav2_bringup_dir, 'launch', 'navigation_launch.py')
-        #     ),
-        #     launch_arguments={
-        #         'use_sim_time': use_sim_time,
-        #         'params_file': nav2_params_file,
-        #         'autostart': autostart,
-        #     }.items()
-        # ),
-        
-        
-        # # RViz (optional - comment out if running separately)
-        # Node(
-        #     package='rviz2',
-        #     executable='rviz2',
-        #     name='rviz2',
-        #     arguments=['-d', os.path.join(pkg_dir, 'config', 'nav2_drone.rviz')],
-        #     parameters=[{'use_sim_time': use_sim_time}],
-        #     output='screen'
-        # ),
 
     ])

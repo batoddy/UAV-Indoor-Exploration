@@ -44,16 +44,16 @@ Visualization Manager:
       Voxel Rendering: Occupied Voxels
 
     # ═══════════════════════════════════════════════════════════════════
-    # COSTMAP (2D with inflation)
+    # NAV2 GLOBAL COSTMAP
     # ═══════════════════════════════════════════════════════════════════
     - Class: rviz_default_plugins/Map
       Enabled: true
-      Name: Costmap
+      Name: Nav2 Global Costmap
       Topic:
-        Value: /exploration/costmap
+        Value: /planner_server/global_costmap/costmap
         Depth: 5
         Durability Policy: Volatile
-        Reliability Policy: Reliable
+        Reliability Policy: Best Effort
       Alpha: 0.6
       Color Scheme: costmap
       Draw Behind: false
@@ -86,7 +86,23 @@ Visualization Manager:
         Reliability Policy: Reliable
 
     # ═══════════════════════════════════════════════════════════════════
-    # PLANNED PATH (from path planner)
+    # NAV2 RAW PATH (from Nav2 planner)
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/Path
+      Enabled: true
+      Name: Nav2 Path
+      Topic:
+        Value: /exploration/nav2_path
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+      Color: 255; 165; 0
+      Line Style: Lines
+      Alpha: 0.8
+      Pose Style: None
+
+    # ═══════════════════════════════════════════════════════════════════
+    # PLANNED PATH (with yaw injection)
     # ═══════════════════════════════════════════════════════════════════
     - Class: rviz_default_plugins/Path
       Enabled: true
@@ -99,7 +115,9 @@ Visualization Manager:
       Color: 0; 255; 255
       Line Style: Lines
       Alpha: 1.0
-      Pose Style: None
+      Pose Style: Arrows
+      Shaft Length: 0.1
+      Head Length: 0.05
 
     # ═══════════════════════════════════════════════════════════════════
     # FRONTIER MARKERS
@@ -116,15 +134,6 @@ Visualization Manager:
     # ═══════════════════════════════════════════════════════════════════
     # EXPLORATION MARKERS (tour, trajectory, trail)
     # ═══════════════════════════════════════════════════════════════════
-    # Bu topic şunları içerir:
-    #   - path_trail: Drone'un geçtiği yol (TURUNCU LINE_STRIP)
-    #   - global_tour: Global frontier tour (SARI LINE_STRIP)
-    #   - global_waypoints: Waypoint spheres (SARI)
-    #   - waypoint_labels: Waypoint numaraları (TEXT)
-    #   - refined_tour: Refined local tour (CYAN LINE_STRIP)
-    #   - trajectory: Current trajectory (YEŞİL LINE_STRIP)
-    #   - velocity_arrows: Trajectory hız vektörleri (ARROWS)
-    #   - status: Exploration durumu metni (TEXT)
     - Class: rviz_default_plugins/MarkerArray
       Enabled: true
       Name: Exploration Markers
@@ -152,21 +161,21 @@ Visualization Manager:
       Head Length: 0.1
 
     # ═══════════════════════════════════════════════════════════════════
-    # ODOMETRY (with covariance if available)
+    # DEPTH CAMERA POINT CLOUD
     # ═══════════════════════════════════════════════════════════════════
-    - Class: rviz_default_plugins/Odometry
+    - Class: rviz_default_plugins/PointCloud2
       Enabled: false
-      Name: Odometry
+      Name: DepthPoints
       Topic:
-        Value: /odom
+        Value: /camera/points
         Depth: 5
         Durability Policy: Volatile
         Reliability Policy: Reliable
-      Covariance:
-        Orientation: false
-        Position: true
-      Keep: 100
-      Shape: Arrow
+      Style: Points
+      Size (Pixels): 2
+      Color Transformer: FlatColor
+      Color: 255; 255; 0
+      Alpha: 0.5
 
     # ═══════════════════════════════════════════════════════════════════
     # GRID

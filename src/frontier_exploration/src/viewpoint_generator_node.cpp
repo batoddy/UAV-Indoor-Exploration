@@ -1,580 +1,949 @@
 /**
- * Node 2: Viewpoint Generator (with Temporal Stabilization)
- * 
- * Input:  /frontier_clusters (frontier_exploration/FrontierArray)
- *         /octomap_binary (octomap_msgs/Octomap) - 3D obstacle checking
- *         /map (nav_msgs/OccupancyGrid) - 2D fallback
- * Output: /frontier_clusters_with_viewpoints (frontier_exploration/FrontierArray)
- * 
- * Generates candidate viewpoints for each frontier cluster using cylindrical sampling.
- * Uses OctoMap for accurate 3D collision checking with robot footprint.
- * 
- * NEW: Temporal Stabilization (FUEL-inspired)
- * - Tracks previous viewpoints per cluster
- * - Uses hysteresis to prevent jitter
- * - Only updates viewpoint if new one is significantly better
+ * Node 2: Viewpoint Generator (Feature-rich + Occlusion-aware + Stabilized)
+ *
+ * Input:
+ *   /frontier_clusters (frontier_exploration/FrontierArray)
+ *   /octomap_binary    (octomap_msgs/Octomap)   [optional 3D checking]
+ *   /map               (nav_msgs/OccupancyGrid) [2D fallback + LOS]
+ *
+ * Output:
+ *   /frontier_clusters_with_viewpoints (frontier_exploration/FrontierArray)
+ *
+ * What it does:
+ *  - For each frontier cluster, samples candidate viewpoints on a ring (cylindrical sampling).
+ *  - Checks 2D footprint clearance on OccupancyGrid.
+ *  - Checks 3D footprint clearance on OctoMap (if available).
+ *  - Finds best yaw per viewpoint by maximizing frontier coverage.
+ *  - Coverage is occlusion-aware:
+ *      If there is an occupied cell along the ray from viewpoint to a frontier cell,
+ *      that frontier cell is not counted, and farther cells along that direction are not counted.
+ *  - Temporal stabilization (hysteresis) keeps old best viewpoint if new one is not significantly better.
+ *
+ * Added (Feature-rich):
+ *  - Writes into each Viewpoint:
+ *      coverage, distance_to_centroid,
+ *      cluster_id, cluster_size, cluster_centroid
  */
 
 #include <rclcpp/rclcpp.hpp>
 #include <nav_msgs/msg/occupancy_grid.hpp>
+
 #include <octomap_msgs/msg/octomap.hpp>
 #include <octomap_msgs/conversions.h>
 #include <octomap/octomap.h>
+
 #include "frontier_exploration/msg/frontier_array.hpp"
+#include "frontier_exploration/msg/frontier_cluster.hpp"
 #include "frontier_exploration/msg/viewpoint.hpp"
 #include "frontier_exploration/common.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 using namespace frontier_exploration;
 
 class ViewpointGeneratorNode : public rclcpp::Node
 {
 public:
-  ViewpointGeneratorNode() : Node("viewpoint_generator")
-  {
-    // Sensor parameters
-    declare_parameter("sensor_range", 5.0);
-    declare_parameter("sensor_fov_h", 1.57);
-    
-    // Viewpoint sampling parameters
-    declare_parameter("min_dist", 1.5);
-    declare_parameter("max_dist", 4.0);
-    declare_parameter("num_dist_samples", 3);
-    declare_parameter("num_angle_samples", 12);
-    declare_parameter("min_coverage", 3);
-    declare_parameter("max_viewpoints", 5);
-    
-    // Map thresholds
-    declare_parameter("free_threshold", 25);
-    declare_parameter("occupied_threshold", 65);
-    
-    // Robot footprint parameters
-    declare_parameter("robot_width", 0.5);
-    declare_parameter("robot_length", 0.5);
-    declare_parameter("robot_height", 0.3);
-    declare_parameter("safety_margin", 0.3);
-    
-    // Flight height for 3D checking
-    declare_parameter("flight_height", 1.5);
-    declare_parameter("height_tolerance", 0.2);
-    
-    // ============ NEW: VIEWPOINT STABILIZATION PARAMETERS ============
-    declare_parameter("vp_hysteresis_distance", 1.0);    // [m] VP bu mesafe içindeyse güncelleme
-    declare_parameter("vp_hysteresis_coverage", 1.3);    // Coverage bu kadar artmalı değişim için
-    declare_parameter("vp_tracking_timeout", 5.0);       // [s] Bu süre sonra eski VP'yi unut
-    declare_parameter("vp_stabilization_enabled", true); // Stabilization açık/kapalı
-    
-    sensor_range_ = get_parameter("sensor_range").as_double();
-    sensor_fov_h_ = get_parameter("sensor_fov_h").as_double();
-    min_dist_ = get_parameter("min_dist").as_double();
-    max_dist_ = get_parameter("max_dist").as_double();
-    num_dist_samples_ = get_parameter("num_dist_samples").as_int();
-    num_angle_samples_ = get_parameter("num_angle_samples").as_int();
-    min_coverage_ = get_parameter("min_coverage").as_int();
-    max_viewpoints_ = get_parameter("max_viewpoints").as_int();
-    free_threshold_ = get_parameter("free_threshold").as_int();
-    occupied_threshold_ = get_parameter("occupied_threshold").as_int();
-    
-    robot_width_ = get_parameter("robot_width").as_double();
-    robot_length_ = get_parameter("robot_length").as_double();
-    robot_height_ = get_parameter("robot_height").as_double();
-    safety_margin_ = get_parameter("safety_margin").as_double();
-    flight_height_ = get_parameter("flight_height").as_double();
-    height_tolerance_ = get_parameter("height_tolerance").as_double();
-    
-    // Stabilization parameters
-    vp_hysteresis_distance_ = get_parameter("vp_hysteresis_distance").as_double();
-    vp_hysteresis_coverage_ = get_parameter("vp_hysteresis_coverage").as_double();
-    vp_tracking_timeout_ = get_parameter("vp_tracking_timeout").as_double();
-    vp_stabilization_enabled_ = get_parameter("vp_stabilization_enabled").as_bool();
-    
-    // Calculate clearance radius
-    clearance_radius_ = std::sqrt(robot_width_*robot_width_ + robot_length_*robot_length_) / 2.0 
-                        + safety_margin_;
-    
-    // Subscribers
-    clusters_sub_ = create_subscription<frontier_exploration::msg::FrontierArray>(
-      "frontier_clusters", 10,
-      std::bind(&ViewpointGeneratorNode::clustersCallback, this, std::placeholders::_1));
-    
-    map_sub_ = create_subscription<nav_msgs::msg::OccupancyGrid>(
-      "/map", 10,
-      std::bind(&ViewpointGeneratorNode::mapCallback, this, std::placeholders::_1));
-    
-    octomap_sub_ = create_subscription<octomap_msgs::msg::Octomap>(
-      "/octomap_binary", 10,
-      std::bind(&ViewpointGeneratorNode::octomapCallback, this, std::placeholders::_1));
-    
-    // Publisher
-    clusters_pub_ = create_publisher<frontier_exploration::msg::FrontierArray>(
-      "frontier_clusters_with_viewpoints", 10);
-    
-    RCLCPP_INFO(get_logger(), "Viewpoint Generator initialized");
-    RCLCPP_INFO(get_logger(), "  Robot: %.2f x %.2f x %.2f m", robot_width_, robot_length_, robot_height_);
-    RCLCPP_INFO(get_logger(), "  Clearance radius: %.2f m (includes %.2f m safety)", 
-                clearance_radius_, safety_margin_);
-    RCLCPP_INFO(get_logger(), "  Flight height: %.2f m (±%.2f m)", flight_height_, height_tolerance_);
-    RCLCPP_INFO(get_logger(), "  Stabilization: %s (hysteresis: %.2fm, coverage: %.1fx)", 
-                vp_stabilization_enabled_ ? "ENABLED" : "DISABLED",
-                vp_hysteresis_distance_, vp_hysteresis_coverage_);
-  }
+    ViewpointGeneratorNode() : Node("viewpoint_generator")
+    {
+        // Sensor parameters
+        declare_parameter("sensor_range", 5.0);
+        declare_parameter("sensor_fov_h", 1.57);
+
+        // Viewpoint sampling parameters
+        declare_parameter("min_dist", 1.5);
+        declare_parameter("max_dist", 4.0);
+        declare_parameter("num_dist_samples", 3);
+        declare_parameter("num_angle_samples", 12);
+        declare_parameter("min_coverage", 3);
+        declare_parameter("max_viewpoints", 5);
+
+        // Map thresholds
+        declare_parameter("free_threshold", 25);
+        declare_parameter("occupied_threshold", 65);
+
+        // Robot footprint parameters
+        declare_parameter("robot_width", 0.5);
+        declare_parameter("robot_length", 0.5);
+        declare_parameter("robot_height", 0.3);
+        declare_parameter("safety_margin", 0.3);
+
+        // Flight height for 3D checking
+        declare_parameter("flight_height", 1.5);
+        declare_parameter("height_tolerance", 0.2);
+
+        // Viewpoint stabilization parameters
+        declare_parameter("vp_hysteresis_distance", 1.0); // [m]
+        declare_parameter("vp_hysteresis_coverage", 1.3); // [x] new_cov must be > old_cov * this
+        declare_parameter("vp_tracking_timeout", 5.0);    // [s]
+        declare_parameter("vp_stabilization_enabled", true);
+
+        // Occlusion-aware coverage parameters
+        declare_parameter("occlusion_enabled", true);
+        declare_parameter("occlusion_angle_bin_rad", 0.02); // angular bin size [rad], ~1.15 deg
+        declare_parameter("yaw_samples", 36);               // yaw optimization samples
+
+        // NEW: Viewpoint quality filters
+        declare_parameter("require_los_to_centroid", true);     // Reject VP if wall blocks view to centroid
+        declare_parameter("min_coverage_ratio", 0.2);           // Min % of frontier cells visible (0.0-1.0)
+
+        // NEW: Normal-direction sampling (only sample viewpoints facing the frontier)
+        declare_parameter("use_normal_sampling", true);         // Enable normal-based sampling
+        declare_parameter("normal_angle_range", 2.094);         // Sample within ±60° of normal (120° total)
+
+        // Read parameters
+        sensor_range_ = get_parameter("sensor_range").as_double();
+        sensor_fov_h_ = get_parameter("sensor_fov_h").as_double();
+
+        min_dist_ = get_parameter("min_dist").as_double();
+        max_dist_ = get_parameter("max_dist").as_double();
+        num_dist_samples_ = get_parameter("num_dist_samples").as_int();
+        num_angle_samples_ = get_parameter("num_angle_samples").as_int();
+        min_coverage_ = get_parameter("min_coverage").as_int();
+        max_viewpoints_ = get_parameter("max_viewpoints").as_int();
+
+        free_threshold_ = static_cast<int8_t>(get_parameter("free_threshold").as_int());
+        occupied_threshold_ = static_cast<int8_t>(get_parameter("occupied_threshold").as_int());
+
+        robot_width_ = get_parameter("robot_width").as_double();
+        robot_length_ = get_parameter("robot_length").as_double();
+        robot_height_ = get_parameter("robot_height").as_double();
+        safety_margin_ = get_parameter("safety_margin").as_double();
+
+        flight_height_ = get_parameter("flight_height").as_double();
+        height_tolerance_ = get_parameter("height_tolerance").as_double();
+
+        vp_hysteresis_distance_ = get_parameter("vp_hysteresis_distance").as_double();
+        vp_hysteresis_coverage_ = get_parameter("vp_hysteresis_coverage").as_double();
+        vp_tracking_timeout_ = get_parameter("vp_tracking_timeout").as_double();
+        vp_stabilization_enabled_ = get_parameter("vp_stabilization_enabled").as_bool();
+
+        occlusion_enabled_ = get_parameter("occlusion_enabled").as_bool();
+        occlusion_angle_bin_rad_ = get_parameter("occlusion_angle_bin_rad").as_double();
+        yaw_samples_ = get_parameter("yaw_samples").as_int();
+
+        // NEW: Read quality filter parameters
+        require_los_to_centroid_ = get_parameter("require_los_to_centroid").as_bool();
+        min_coverage_ratio_ = get_parameter("min_coverage_ratio").as_double();
+        use_normal_sampling_ = get_parameter("use_normal_sampling").as_bool();
+        normal_angle_range_ = get_parameter("normal_angle_range").as_double();
+
+        // Clearance radius (2D)
+        clearance_radius_ =
+            std::sqrt(robot_width_ * robot_width_ + robot_length_ * robot_length_) / 2.0 + safety_margin_;
+
+        // Subscribers
+        clusters_sub_ = create_subscription<frontier_exploration::msg::FrontierArray>(
+            "frontier_clusters", 10,
+            std::bind(&ViewpointGeneratorNode::clustersCallback, this, std::placeholders::_1));
+
+        map_sub_ = create_subscription<nav_msgs::msg::OccupancyGrid>(
+            "/map", 10,
+            std::bind(&ViewpointGeneratorNode::mapCallback, this, std::placeholders::_1));
+
+        octomap_sub_ = create_subscription<octomap_msgs::msg::Octomap>(
+            "/octomap_binary", 10,
+            std::bind(&ViewpointGeneratorNode::octomapCallback, this, std::placeholders::_1));
+
+        // Publisher
+        clusters_pub_ = create_publisher<frontier_exploration::msg::FrontierArray>(
+            "frontier_clusters_with_viewpoints", 10);
+
+        RCLCPP_INFO(get_logger(), "Viewpoint Generator initialized");
+        RCLCPP_INFO(get_logger(), "  Output: frontier_clusters_with_viewpoints");
+        RCLCPP_INFO(get_logger(), "  Clearance radius: %.2f m (safety=%.2f)", clearance_radius_, safety_margin_);
+        RCLCPP_INFO(get_logger(), "  Stabilization: %s", vp_stabilization_enabled_ ? "ENABLED" : "DISABLED");
+        RCLCPP_INFO(get_logger(), "  Occlusion-aware coverage: %s", occlusion_enabled_ ? "ENABLED" : "DISABLED");
+        RCLCPP_INFO(get_logger(), "  LOS to centroid check: %s", require_los_to_centroid_ ? "ENABLED" : "DISABLED");
+        RCLCPP_INFO(get_logger(), "  Min coverage ratio: %.1f%%", min_coverage_ratio_ * 100.0);
+        RCLCPP_INFO(get_logger(), "  Normal-direction sampling: %s (range=%.0f°)",
+                    use_normal_sampling_ ? "ENABLED" : "DISABLED",
+                    normal_angle_range_ * 180.0 / M_PI);
+    }
 
 private:
-  // ============ VIEWPOINT TRACKING STRUCTURE ============
-  struct TrackedViewpoint {
-    frontier_exploration::msg::Viewpoint viewpoint;
-    rclcpp::Time last_seen;
-    geometry_msgs::msg::Point cluster_centroid;  // Cluster hareket etti mi kontrol için
-  };
-  
-  // Cluster ID -> Tracked viewpoint mapping
-  std::unordered_map<uint32_t, TrackedViewpoint> tracked_viewpoints_;
-  
-  void mapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg)
-  {
-    current_map_ = msg;
-  }
-  
-  void octomapCallback(const octomap_msgs::msg::Octomap::SharedPtr msg)
-  {
-    octomap::AbstractOcTree* abstract_tree = octomap_msgs::msgToMap(*msg);
-    if (abstract_tree) {
-      current_octree_.reset(dynamic_cast<octomap::OcTree*>(abstract_tree));
-      if (!current_octree_) {
-        delete abstract_tree;
-      }
+    // ----------------------------
+    // Tracking structure (stabilization)
+    // ----------------------------
+    struct TrackedViewpoint
+    {
+        frontier_exploration::msg::Viewpoint viewpoint; // best viewpoint (with features)
+        rclcpp::Time last_seen;
+        geometry_msgs::msg::Point cluster_centroid;
+    };
+
+    std::unordered_map<uint32_t, TrackedViewpoint> tracked_viewpoints_;
+
+    // ----------------------------
+    // Utility helpers
+    // ----------------------------
+    static inline double dist2(const geometry_msgs::msg::Point &a, const geometry_msgs::msg::Point &b)
+    {
+        const double dx = a.x - b.x;
+        const double dy = a.y - b.y;
+        return dx * dx + dy * dy;
     }
-  }
-  
-  void clustersCallback(const frontier_exploration::msg::FrontierArray::SharedPtr msg)
-  {
-    if (!current_map_) {
-      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 5000, "No map received yet");
-      return;
+
+    static inline double dist(const geometry_msgs::msg::Point &a, const geometry_msgs::msg::Point &b)
+    {
+        return std::sqrt(dist2(a, b));
     }
-    
-    auto start_time = now();
-    
-    frontier_exploration::msg::FrontierArray output;
-    output.header = msg->header;
-    
-    int total_candidates = 0;
-    int rejected_2d = 0;
-    int rejected_3d = 0;
-    int accepted = 0;
-    int stabilized = 0;
-    
-    // Track which clusters we see this frame
-    std::set<uint32_t> seen_clusters;
-    
-    for (auto cluster : msg->clusters) {
-      seen_clusters.insert(cluster.id);
-      
-      auto [t_cand, r_2d, r_3d, acc] = generateViewpoints(cluster, *current_map_);
-      total_candidates += t_cand;
-      rejected_2d += r_2d;
-      rejected_3d += r_3d;
-      accepted += acc;
-      
-      // Apply stabilization to best viewpoint
-      if (vp_stabilization_enabled_ && !cluster.viewpoints.empty()) {
-        bool was_stabilized = stabilizeViewpoints(cluster);
-        if (was_stabilized) stabilized++;
-      }
-      
-      output.clusters.push_back(cluster);
+
+    // Normalize angle to [-pi, pi)
+    static inline double normalizeAngle(double a)
+    {
+        while (a >= M_PI)
+            a -= 2.0 * M_PI;
+        while (a < -M_PI)
+            a += 2.0 * M_PI;
+        return a;
     }
-    
-    // Clean up old tracked viewpoints
-    cleanupTrackedViewpoints(seen_clusters);
-    
-    clusters_pub_->publish(output);
-    
-    auto duration = (now() - start_time).seconds() * 1000.0;
-    RCLCPP_DEBUG(get_logger(), 
-                 "Viewpoints: %d candidates, %d rejected(2D), %d rejected(3D), %d accepted, %d stabilized [%.1fms]",
-                 total_candidates, rejected_2d, rejected_3d, accepted, stabilized, duration);
-  }
-  
-  /**
-   * Stabilize viewpoints using temporal tracking
-   * Returns true if viewpoint was kept from previous frame
-   */
-  bool stabilizeViewpoints(frontier_exploration::msg::FrontierCluster& cluster)
-  {
-    if (cluster.viewpoints.empty()) return false;
-    
-    auto& new_best_vp = cluster.viewpoints[0];
-    auto it = tracked_viewpoints_.find(cluster.id);
-    
-    if (it != tracked_viewpoints_.end()) {
-      auto& tracked = it->second;
-      
-      // Check if tracking is still valid (not timed out)
-      double elapsed = (now() - tracked.last_seen).seconds();
-      if (elapsed > vp_tracking_timeout_) {
-        // Tracking expired, use new viewpoint
-        updateTrackedViewpoint(cluster.id, new_best_vp, cluster.centroid);
-        return false;
-      }
-      
-      // Check if cluster centroid moved significantly
-      double centroid_dist = distance(cluster.centroid, tracked.cluster_centroid);
-      if (centroid_dist > vp_hysteresis_distance_ * 2.0) {
-        // Cluster moved a lot, use new viewpoint
-        updateTrackedViewpoint(cluster.id, new_best_vp, cluster.centroid);
-        RCLCPP_DEBUG(get_logger(), "Cluster %d centroid moved %.2fm, resetting VP", 
-                     cluster.id, centroid_dist);
-        return false;
-      }
-      
-      const auto& old_vp = tracked.viewpoint;
-      
-      // Calculate distance between old and new viewpoint
-      double vp_dist = distance(new_best_vp.position, old_vp.position);
-      
-      // Check hysteresis conditions
-      bool within_hysteresis = vp_dist < vp_hysteresis_distance_;
-      bool coverage_not_much_better = new_best_vp.coverage < old_vp.coverage * vp_hysteresis_coverage_;
-      
-      if (within_hysteresis && coverage_not_much_better) {
-        // Keep old viewpoint - it's still good enough
-        // But verify it's still valid (not in obstacle)
-        if (isViewpointStillValid(old_vp)) {
-          cluster.viewpoints[0] = old_vp;
-          tracked.last_seen = now();
-          
-          RCLCPP_DEBUG(get_logger(), 
-                       "Cluster %d: Kept stable VP (dist=%.2f, old_cov=%d, new_cov=%d)",
-                       cluster.id, vp_dist, old_vp.coverage, new_best_vp.coverage);
-          return true;
-        } else {
-          RCLCPP_DEBUG(get_logger(), "Cluster %d: Old VP invalid, using new", cluster.id);
-        }
-      }
-      
-      // New viewpoint is significantly better or old one moved out of hysteresis
-      updateTrackedViewpoint(cluster.id, new_best_vp, cluster.centroid);
-      RCLCPP_DEBUG(get_logger(), 
-                   "Cluster %d: Updated VP (dist=%.2f, coverage: %d -> %d)",
-                   cluster.id, vp_dist, old_vp.coverage, new_best_vp.coverage);
-      return false;
+
+    // ----------------------------
+    // Callbacks
+    // ----------------------------
+    void mapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg)
+    {
+        current_map_ = msg;
     }
-    
-    // First time seeing this cluster
-    updateTrackedViewpoint(cluster.id, new_best_vp, cluster.centroid);
-    return false;
-  }
-  
-  void updateTrackedViewpoint(uint32_t cluster_id, 
-                               const frontier_exploration::msg::Viewpoint& vp,
-                               const geometry_msgs::msg::Point& centroid)
-  {
-    TrackedViewpoint tracked;
-    tracked.viewpoint = vp;
-    tracked.last_seen = now();
-    tracked.cluster_centroid = centroid;
-    tracked_viewpoints_[cluster_id] = tracked;
-  }
-  
-  bool isViewpointStillValid(const frontier_exploration::msg::Viewpoint& vp)
-  {
-    if (!current_map_) return false;
-    
-    // Check 2D clearance
-    if (!hasFootprintClearance2D(vp.position.x, vp.position.y, *current_map_)) {
-      return false;
+
+    void octomapCallback(const octomap_msgs::msg::Octomap::SharedPtr msg)
+    {
+        octomap::AbstractOcTree *abstract_tree = octomap_msgs::msgToMap(*msg);
+        if (!abstract_tree)
+            return;
+
+        current_octree_.reset(dynamic_cast<octomap::OcTree *>(abstract_tree));
+        if (!current_octree_)
+        {
+            delete abstract_tree; // dynamic_cast failed
+        }
     }
-    
-    // Check 3D clearance if available
-    if (current_octree_ && !hasFootprintClearance3D(vp.position.x, vp.position.y, vp.position.z)) {
-      return false;
+
+    void clustersCallback(const frontier_exploration::msg::FrontierArray::SharedPtr msg)
+    {
+        if (!current_map_)
+        {
+            RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 5000, "No map received yet");
+            return;
+        }
+
+        frontier_exploration::msg::FrontierArray output;
+        output.header = msg->header;
+        output.clusters = msg->clusters;
+
+        std::unordered_set<uint32_t> seen_clusters;
+        seen_clusters.reserve(output.clusters.size());
+
+        for (auto &cluster : output.clusters)
+        {
+            seen_clusters.insert(cluster.id);
+
+            // 1) Generate candidates + compute yaw + compute coverage
+            generateViewpoints(cluster, *current_map_);
+
+            // 2) Stabilize best viewpoint (index 0)
+            if (vp_stabilization_enabled_ && !cluster.viewpoints.empty())
+            {
+                stabilizeBestViewpoint(cluster);
+            }
+
+            // 3) Make sure cluster context fields are present (in case stabilization swapped an old VP)
+            //    (old vp already has these, but this is safe)
+            for (auto &vp : cluster.viewpoints)
+            {
+                fillClusterContextIntoViewpoint(vp, cluster);
+            }
+        }
+
+        cleanupTrackedViewpoints(seen_clusters);
+
+        clusters_pub_->publish(output);
     }
-    
-    return true;
-  }
-  
-  void cleanupTrackedViewpoints(const std::set<uint32_t>& seen_clusters)
-  {
-    auto current_time = now();
-    
-    for (auto it = tracked_viewpoints_.begin(); it != tracked_viewpoints_.end(); ) {
-      // Remove if cluster not seen and tracking timed out
-      if (seen_clusters.find(it->first) == seen_clusters.end()) {
-        double elapsed = (current_time - it->second.last_seen).seconds();
-        if (elapsed > vp_tracking_timeout_) {
-          RCLCPP_DEBUG(get_logger(), "Removed stale tracking for cluster %d", it->first);
-          it = tracked_viewpoints_.erase(it);
-          continue;
-        }
-      }
-      ++it;
+
+    // ----------------------------
+    // Feature injection (cluster context -> viewpoint)
+    // ----------------------------
+    void fillClusterContextIntoViewpoint(frontier_exploration::msg::Viewpoint &vp,
+                                         const frontier_exploration::msg::FrontierCluster &cluster)
+    {
+        // These fields require you to extend Viewpoint.msg accordingly.
+        vp.cluster_id = cluster.id;
+        vp.cluster_size = static_cast<int32_t>(cluster.cells.size());
+        vp.cluster_centroid = cluster.centroid;
     }
-  }
-  
-  double distance(const geometry_msgs::msg::Point& a, const geometry_msgs::msg::Point& b)
-  {
-    double dx = a.x - b.x;
-    double dy = a.y - b.y;
-    return std::sqrt(dx*dx + dy*dy);
-  }
-  
-  std::tuple<int, int, int, int> generateViewpoints(
-    frontier_exploration::msg::FrontierCluster& cluster,
-    const nav_msgs::msg::OccupancyGrid& map)
-  {
-    cluster.viewpoints.clear();
-    
-    double dist_step = (num_dist_samples_ > 1) ? 
-      (max_dist_ - min_dist_) / (num_dist_samples_ - 1) : 0;
-    double angle_step = 2.0 * M_PI / num_angle_samples_;
-    
-    std::vector<frontier_exploration::msg::Viewpoint> candidates;
-    
-    int total_candidates = 0;
-    int rejected_2d = 0;
-    int rejected_3d = 0;
-    
-    for (int di = 0; di < num_dist_samples_; ++di) {
-      double dist = min_dist_ + di * dist_step;
-      
-      for (int ai = 0; ai < num_angle_samples_; ++ai) {
-        double angle = ai * angle_step;
-        total_candidates++;
-        
-        geometry_msgs::msg::Point vp_pos;
-        vp_pos.x = cluster.centroid.x + dist * std::cos(angle);
-        vp_pos.y = cluster.centroid.y + dist * std::sin(angle);
-        vp_pos.z = flight_height_;
-        
-        // Step 1: Check 2D map clearance
-        if (!hasFootprintClearance2D(vp_pos.x, vp_pos.y, map)) {
-          rejected_2d++;
-          continue;
+
+    // ----------------------------
+    // NEW: Compute frontier normal direction (towards free space)
+    // ----------------------------
+    // The frontier separates free space from unknown space.
+    // We want to place viewpoints on the FREE side, not the unknown side.
+    double computeFrontierNormal(const frontier_exploration::msg::FrontierCluster &cluster,
+                                  const nav_msgs::msg::OccupancyGrid &map)
+    {
+        // Get the principal axis from PCA (direction along the frontier)
+        // principal_axis is [axis_x, axis_y] from frontier_detector
+        const double axis_x = cluster.principal_axis[0];
+        const double axis_y = cluster.principal_axis[1];
+
+        // Normal is perpendicular to the principal axis (two possible directions)
+        // normal1 = (-axis_y, axis_x), normal2 = (axis_y, -axis_x)
+        const double normal1_x = -axis_y;
+        const double normal1_y = axis_x;
+
+        // Check which direction has more FREE cells (that's where the viewpoint should be)
+        const double check_dist = 0.5; // Check 0.5m away from centroid
+
+        const double p1_x = cluster.centroid.x + normal1_x * check_dist;
+        const double p1_y = cluster.centroid.y + normal1_y * check_dist;
+        const double p2_x = cluster.centroid.x - normal1_x * check_dist;
+        const double p2_y = cluster.centroid.y - normal1_y * check_dist;
+
+        // Count free cells in both directions
+        int free_count_1 = 0, free_count_2 = 0;
+        const double sample_step = map.info.resolution * 2;
+
+        for (double d = sample_step; d <= check_dist * 2; d += sample_step)
+        {
+            // Direction 1
+            auto [gx1, gy1] = worldToGrid(
+                cluster.centroid.x + normal1_x * d,
+                cluster.centroid.y + normal1_y * d, map);
+            if (gx1 >= 0 && gx1 < (int)map.info.width && gy1 >= 0 && gy1 < (int)map.info.height)
+            {
+                int8_t v = map.data[getIndex(gx1, gy1, map.info.width)];
+                if (isFree(v, free_threshold_))
+                    free_count_1++;
+            }
+
+            // Direction 2
+            auto [gx2, gy2] = worldToGrid(
+                cluster.centroid.x - normal1_x * d,
+                cluster.centroid.y - normal1_y * d, map);
+            if (gx2 >= 0 && gx2 < (int)map.info.width && gy2 >= 0 && gy2 < (int)map.info.height)
+            {
+                int8_t v = map.data[getIndex(gx2, gy2, map.info.width)];
+                if (isFree(v, free_threshold_))
+                    free_count_2++;
+            }
         }
-        
-        // Step 2: Check 3D OctoMap clearance (if available)
-        if (current_octree_ && !hasFootprintClearance3D(vp_pos.x, vp_pos.y, vp_pos.z)) {
-          rejected_3d++;
-          continue;
+
+        // Return the angle of the normal pointing towards free space
+        if (free_count_1 >= free_count_2)
+        {
+            return std::atan2(normal1_y, normal1_x);
         }
-        
-        // Step 3: Optimize yaw for coverage
-        auto [best_yaw, best_coverage] = optimizeYaw(vp_pos, cluster, map);
-        
-        if (best_coverage >= min_coverage_) {
-          frontier_exploration::msg::Viewpoint vp;
-          vp.position = vp_pos;
-          vp.yaw = best_yaw;
-          vp.coverage = best_coverage;
-          vp.distance_to_centroid = dist;
-          candidates.push_back(vp);
+        else
+        {
+            return std::atan2(-normal1_y, -normal1_x);
         }
-      }
     }
-    
-    // Sort by coverage (descending)
-    std::sort(candidates.begin(), candidates.end(),
-      [](const auto& a, const auto& b) { return a.coverage > b.coverage; });
-    
-    // Keep top N
-    int n = std::min(static_cast<int>(candidates.size()), max_viewpoints_);
-    cluster.viewpoints.assign(candidates.begin(), candidates.begin() + n);
-    
-    return {total_candidates, rejected_2d, rejected_3d, static_cast<int>(cluster.viewpoints.size())};
-  }
-  
-  bool hasFootprintClearance2D(double wx, double wy, const nav_msgs::msg::OccupancyGrid& map)
-  {
-    auto [center_gx, center_gy] = worldToGrid(wx, wy, map);
-    
-    int width = map.info.width;
-    int height = map.info.height;
-    double resolution = map.info.resolution;
-    
-    int cell_radius = static_cast<int>(std::ceil(clearance_radius_ / resolution));
-    
-    for (int dy = -cell_radius; dy <= cell_radius; ++dy) {
-      for (int dx = -cell_radius; dx <= cell_radius; ++dx) {
-        int gx = center_gx + dx;
-        int gy = center_gy + dy;
-        
-        if (gx < 0 || gx >= width || gy < 0 || gy >= height) {
-          return false;
-        }
-        
-        double cell_dist = std::sqrt(dx*dx + dy*dy) * resolution;
-        if (cell_dist > clearance_radius_) {
-          continue;
-        }
-        
-        int8_t cell_value = map.data[getIndex(gx, gy, width)];
-        
-        if (isOccupied(cell_value, occupied_threshold_)) {
-          return false;
-        }
-        
-        if (cell_value < 0 && cell_dist < clearance_radius_ * 0.5) {
-          return false;
-        }
-      }
+
+    // ----------------------------
+    // NEW: Check if angle is within normal sampling range
+    // ----------------------------
+    bool isAngleInNormalRange(double angle, double normal_angle, double range) const
+    {
+        double diff = std::abs(normalizeAngle(angle - normal_angle));
+        return diff <= range / 2.0;
     }
-    
-    int center_idx = getIndex(center_gx, center_gy, width);
-    return isFree(map.data[center_idx], free_threshold_);
-  }
-  
-  bool hasFootprintClearance3D(double wx, double wy, double wz)
-  {
-    if (!current_octree_) return true;
-    
-    double resolution = current_octree_->getResolution();
-    
-    double half_w = (robot_width_ / 2.0) + safety_margin_;
-    double half_l = (robot_length_ / 2.0) + safety_margin_;
-    double half_h = (robot_height_ / 2.0) + height_tolerance_;
-    
-    double step = resolution;
-    
-    for (double dz = -half_h; dz <= half_h; dz += step) {
-      for (double dy = -half_l; dy <= half_l; dy += step) {
-        for (double dx = -half_w; dx <= half_w; dx += step) {
-          double px = wx + dx;
-          double py = wy + dy;
-          double pz = wz + dz;
-          
-          octomap::OcTreeNode* node = current_octree_->search(px, py, pz);
-          
-          if (node && current_octree_->isNodeOccupied(node)) {
+
+    // ----------------------------
+    // Viewpoint generation (IMPROVED)
+    // ----------------------------
+    void generateViewpoints(frontier_exploration::msg::FrontierCluster &cluster,
+                            const nav_msgs::msg::OccupancyGrid &map)
+    {
+        cluster.viewpoints.clear();
+
+        if (num_angle_samples_ <= 0 || num_dist_samples_ <= 0)
+            return;
+
+        // Compute frontier normal direction (towards free space)
+        double frontier_normal = 0.0;
+        if (use_normal_sampling_)
+        {
+            frontier_normal = computeFrontierNormal(cluster, map);
+        }
+
+        // Calculate minimum coverage based on cluster size
+        const int min_coverage_absolute = std::max(
+            min_coverage_,
+            static_cast<int>(cluster.cells.size() * min_coverage_ratio_));
+
+        const double dist_step =
+            (num_dist_samples_ > 1) ? (max_dist_ - min_dist_) / (num_dist_samples_ - 1) : 0.0;
+        const double angle_step = 2.0 * M_PI / static_cast<double>(num_angle_samples_);
+
+        std::vector<frontier_exploration::msg::Viewpoint> candidates;
+        candidates.reserve(static_cast<size_t>(num_angle_samples_ * num_dist_samples_));
+
+        for (int di = 0; di < num_dist_samples_; ++di)
+        {
+            const double dist_to_centroid = min_dist_ + di * dist_step;
+
+            for (int ai = 0; ai < num_angle_samples_; ++ai)
+            {
+                const double angle = ai * angle_step;
+
+                // NEW: Normal-direction filtering
+                // Only sample viewpoints that are on the "free space" side of the frontier
+                if (use_normal_sampling_)
+                {
+                    if (!isAngleInNormalRange(angle, frontier_normal, normal_angle_range_))
+                    {
+                        continue;
+                    }
+                }
+
+                geometry_msgs::msg::Point vp_pos;
+                vp_pos.x = cluster.centroid.x + dist_to_centroid * std::cos(angle);
+                vp_pos.y = cluster.centroid.y + dist_to_centroid * std::sin(angle);
+                vp_pos.z = flight_height_;
+
+                // 1) 2D footprint clearance
+                if (!hasFootprintClearance2D(vp_pos.x, vp_pos.y, map))
+                {
+                    continue;
+                }
+
+                // 2) 3D footprint clearance (if available)
+                if (current_octree_ && !hasFootprintClearance3D(vp_pos.x, vp_pos.y, vp_pos.z))
+                {
+                    continue;
+                }
+
+                // 3) NEW: LOS to centroid check
+                // Reject viewpoints that can't see the centroid (wall in between)
+                if (require_los_to_centroid_)
+                {
+                    if (!hasLineOfSight(vp_pos.x, vp_pos.y, cluster.centroid.x, cluster.centroid.y, map))
+                    {
+                        continue;
+                    }
+                }
+
+                // 4) Optimize yaw by coverage
+                const auto [best_yaw, best_cov] = optimizeYaw(vp_pos, cluster, map);
+
+                // 5) NEW: Percentage-based minimum coverage
+                if (best_cov < min_coverage_absolute)
+                {
+                    continue;
+                }
+
+                // Build viewpoint (with features)
+                frontier_exploration::msg::Viewpoint vp;
+                vp.position = vp_pos;
+                vp.yaw = best_yaw;
+                vp.coverage = best_cov;
+                vp.distance_to_centroid = dist_to_centroid;
+
+                // Put cluster context directly here
+                fillClusterContextIntoViewpoint(vp, cluster);
+
+                candidates.push_back(vp);
+            }
+        }
+
+        // Sort by coverage desc (stable)
+        std::sort(candidates.begin(), candidates.end(),
+                  [](const auto &a, const auto &b)
+                  { return a.coverage > b.coverage; });
+
+        const int keep_n = std::min(static_cast<int>(candidates.size()), max_viewpoints_);
+        cluster.viewpoints.assign(candidates.begin(), candidates.begin() + keep_n);
+    }
+
+    // ----------------------------
+    // Stabilization (keep old best VP if still good)
+    // ----------------------------
+    void stabilizeBestViewpoint(frontier_exploration::msg::FrontierCluster &cluster)
+    {
+        if (cluster.viewpoints.empty())
+            return;
+
+        auto &new_best = cluster.viewpoints[0];
+        auto it = tracked_viewpoints_.find(cluster.id);
+
+        // First time: track it
+        if (it == tracked_viewpoints_.end())
+        {
+            updateTrackedViewpoint(cluster.id, new_best, cluster.centroid);
+            return;
+        }
+
+        auto &tracked = it->second;
+
+        // Timeout check
+        const double elapsed = (now() - tracked.last_seen).seconds();
+        if (elapsed > vp_tracking_timeout_)
+        {
+            updateTrackedViewpoint(cluster.id, new_best, cluster.centroid);
+            return;
+        }
+
+        // Cluster moved too much -> reset
+        const double centroid_move = dist(cluster.centroid, tracked.cluster_centroid);
+        if (centroid_move > vp_hysteresis_distance_ * 2.0)
+        {
+            updateTrackedViewpoint(cluster.id, new_best, cluster.centroid);
+            return;
+        }
+
+        const auto &old_vp = tracked.viewpoint;
+        const double vp_move = dist(new_best.position, old_vp.position);
+
+        const bool within_hys = (vp_move < vp_hysteresis_distance_);
+        const bool new_not_much_better = (new_best.coverage < static_cast<int>(old_vp.coverage * vp_hysteresis_coverage_));
+
+        if (within_hys && new_not_much_better)
+        {
+            // Keep old if still valid
+            if (isViewpointStillValid(old_vp, *current_map_))
+            {
+                cluster.viewpoints[0] = old_vp;
+                tracked.last_seen = now();
+                return;
+            }
+            // old invalid -> accept new
+        }
+
+        updateTrackedViewpoint(cluster.id, new_best, cluster.centroid);
+    }
+
+    void updateTrackedViewpoint(uint32_t cluster_id,
+                                const frontier_exploration::msg::Viewpoint &vp,
+                                const geometry_msgs::msg::Point &centroid)
+    {
+        TrackedViewpoint t;
+        t.viewpoint = vp;
+        t.last_seen = now();
+        t.cluster_centroid = centroid;
+        tracked_viewpoints_[cluster_id] = t;
+    }
+
+    bool isViewpointStillValid(const frontier_exploration::msg::Viewpoint &vp,
+                               const nav_msgs::msg::OccupancyGrid &map)
+    {
+        if (!hasFootprintClearance2D(vp.position.x, vp.position.y, map))
             return false;
-          }
+        if (current_octree_ && !hasFootprintClearance3D(vp.position.x, vp.position.y, vp.position.z))
+            return false;
+        return true;
+    }
+
+    void cleanupTrackedViewpoints(const std::unordered_set<uint32_t> &seen)
+    {
+        const auto tnow = now();
+
+        for (auto it = tracked_viewpoints_.begin(); it != tracked_viewpoints_.end();)
+        {
+            const bool seen_now = (seen.find(it->first) != seen.end());
+            const double elapsed = (tnow - it->second.last_seen).seconds();
+
+            if (!seen_now && elapsed > vp_tracking_timeout_)
+            {
+                it = tracked_viewpoints_.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
         }
-      }
     }
-    
-    return true;
-  }
-  
-  std::pair<double, int> optimizeYaw(const geometry_msgs::msg::Point& vp_pos,
-                                      const frontier_exploration::msg::FrontierCluster& cluster,
-                                      const nav_msgs::msg::OccupancyGrid& map)
-  {
-    const int num_samples = 36;
-    double best_yaw = 0;
-    int best_coverage = -1;
-    
-    for (int i = 0; i < num_samples; ++i) {
-      double yaw = (2.0 * M_PI * i) / num_samples - M_PI;
-      int coverage = computeCoverage(vp_pos, yaw, cluster, map);
-      
-      if (coverage > best_coverage) {
-        best_coverage = coverage;
-        best_yaw = yaw;
-      }
-    }
-    
-    return {best_yaw, best_coverage};
-  }
-  
-  int computeCoverage(const geometry_msgs::msg::Point& vp_pos, double yaw,
-                      const frontier_exploration::msg::FrontierCluster& cluster,
-                      const nav_msgs::msg::OccupancyGrid& map)
-  {
-    int count = 0;
-    
-    for (int gy = cluster.bbox_min_y; gy <= cluster.bbox_max_y; ++gy) {
-      for (int gx = cluster.bbox_min_x; gx <= cluster.bbox_max_x; ++gx) {
-        auto cell = gridToWorld(gx, gy, map);
-        
-        double dx = cell.x - vp_pos.x;
-        double dy = cell.y - vp_pos.y;
-        double dist = std::sqrt(dx * dx + dy * dy);
-        
-        if (dist > sensor_range_) continue;
-        
-        double angle_to_cell = std::atan2(dy, dx);
-        if (angleDiff(angle_to_cell, yaw) > sensor_fov_h_ / 2.0) continue;
-        
-        if (hasLineOfSight(vp_pos.x, vp_pos.y, cell.x, cell.y, map)) {
-          count++;
+
+    // ----------------------------
+    // 2D footprint clearance
+    // ----------------------------
+    bool hasFootprintClearance2D(double wx, double wy, const nav_msgs::msg::OccupancyGrid &map)
+    {
+        auto [cgx, cgy] = worldToGrid(wx, wy, map);
+
+        const int width = static_cast<int>(map.info.width);
+        const int height = static_cast<int>(map.info.height);
+        const double res = map.info.resolution;
+
+        // center must be in map
+        if (cgx < 0 || cgx >= width || cgy < 0 || cgy >= height)
+            return false;
+
+        const int cell_radius = static_cast<int>(std::ceil(clearance_radius_ / res));
+        const double r2 = clearance_radius_ * clearance_radius_;
+
+        for (int dy = -cell_radius; dy <= cell_radius; ++dy)
+        {
+            for (int dx = -cell_radius; dx <= cell_radius; ++dx)
+            {
+                const int gx = cgx + dx;
+                const int gy = cgy + dy;
+
+                // Out of bounds -> invalid
+                if (gx < 0 || gx >= width || gy < 0 || gy >= height)
+                    return false;
+
+                // Circle mask using squared distance
+                const double wxr = static_cast<double>(dx) * res;
+                const double wyr = static_cast<double>(dy) * res;
+                const double d2 = wxr * wxr + wyr * wyr;
+                if (d2 > r2)
+                    continue;
+
+                const int idx = getIndex(gx, gy, width);
+                const int8_t v = map.data[idx];
+
+                if (isOccupied(v, occupied_threshold_))
+                    return false;
+
+                // Unknown near center is risky: reject
+                if (isUnknown(v) && d2 < (0.5 * clearance_radius_) * (0.5 * clearance_radius_))
+                    return false;
+            }
         }
-      }
+
+        // ensure center is free
+        const int cidx = getIndex(cgx, cgy, width);
+        return isFree(map.data[cidx], free_threshold_);
     }
-    
-    return count;
-  }
-  
-  bool hasLineOfSight(double x1, double y1, double x2, double y2,
-                      const nav_msgs::msg::OccupancyGrid& map)
-  {
-    auto [gx1, gy1] = worldToGrid(x1, y1, map);
-    auto [gx2, gy2] = worldToGrid(x2, y2, map);
-    
-    int dx = std::abs(gx2 - gx1);
-    int dy = std::abs(gy2 - gy1);
-    int sx = (gx1 < gx2) ? 1 : -1;
-    int sy = (gy1 < gy2) ? 1 : -1;
-    int err = dx - dy;
-    
-    int x = gx1, y = gy1;
-    int width = map.info.width;
-    int height = map.info.height;
-    
-    while (true) {
-      if (x >= 0 && x < width && y >= 0 && y < height) {
-        if (isOccupied(map.data[getIndex(x, y, width)], occupied_threshold_)) {
-          return false;
+
+    // ----------------------------
+    // OPTIMIZED: 3D footprint clearance (OctoMap)
+    // ----------------------------
+    // Instead of checking every voxel in the footprint (O(r³) = ~75 queries),
+    // check only strategic points: 8 corners + center + edge midpoints (~14 queries)
+    // This is 5x faster while still catching most obstacles
+    bool hasFootprintClearance3D(double wx, double wy, double wz)
+    {
+        if (!current_octree_)
+            return true;
+
+        const double half_w = (robot_width_ / 2.0) + safety_margin_;
+        const double half_l = (robot_length_ / 2.0) + safety_margin_;
+        const double half_h = (robot_height_ / 2.0) + height_tolerance_;
+
+        // Strategic check points: corners + center + edge midpoints
+        // This reduces from O(r³) to O(1) with constant ~14 points
+        const std::array<std::array<double, 3>, 14> check_points = {{
+            // 8 corners of the bounding box
+            {{-half_w, -half_l, -half_h}},
+            {{-half_w, -half_l,  half_h}},
+            {{-half_w,  half_l, -half_h}},
+            {{-half_w,  half_l,  half_h}},
+            {{ half_w, -half_l, -half_h}},
+            {{ half_w, -half_l,  half_h}},
+            {{ half_w,  half_l, -half_h}},
+            {{ half_w,  half_l,  half_h}},
+            // Center point
+            {{0.0, 0.0, 0.0}},
+            // Edge midpoints (most likely collision points)
+            {{0.0, 0.0, -half_h}},  // bottom center
+            {{0.0, 0.0,  half_h}},  // top center
+            {{ half_w, 0.0, 0.0}},  // front center
+            {{-half_w, 0.0, 0.0}},  // back center
+            {{0.0,  half_l, 0.0}}   // side center
+        }};
+
+        for (const auto &offset : check_points)
+        {
+            const double px = wx + offset[0];
+            const double py = wy + offset[1];
+            const double pz = wz + offset[2];
+
+            octomap::OcTreeNode *node = current_octree_->search(px, py, pz);
+            if (node && current_octree_->isNodeOccupied(node))
+            {
+                return false;
+            }
         }
-      }
-      
-      if (x == gx2 && y == gy2) break;
-      
-      int e2 = 2 * err;
-      if (e2 > -dy) { err -= dy; x += sx; }
-      if (e2 < dx) { err += dx; y += sy; }
+        return true;
     }
-    
-    return true;
-  }
-  
-  // Parameters
-  double sensor_range_, sensor_fov_h_;
-  double min_dist_, max_dist_;
-  int num_dist_samples_, num_angle_samples_;
-  int min_coverage_, max_viewpoints_;
-  int8_t free_threshold_, occupied_threshold_;
-  
-  // Robot footprint
-  double robot_width_, robot_length_, robot_height_;
-  double safety_margin_;
-  double clearance_radius_;
-  double flight_height_, height_tolerance_;
-  
-  // Stabilization parameters
-  double vp_hysteresis_distance_;
-  double vp_hysteresis_coverage_;
-  double vp_tracking_timeout_;
-  bool vp_stabilization_enabled_;
-  
-  // Maps
-  nav_msgs::msg::OccupancyGrid::SharedPtr current_map_;
-  std::shared_ptr<octomap::OcTree> current_octree_;
-  
-  // ROS
-  rclcpp::Subscription<frontier_exploration::msg::FrontierArray>::SharedPtr clusters_sub_;
-  rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr map_sub_;
-  rclcpp::Subscription<octomap_msgs::msg::Octomap>::SharedPtr octomap_sub_;
-  rclcpp::Publisher<frontier_exploration::msg::FrontierArray>::SharedPtr clusters_pub_;
+
+    // ----------------------------
+    // OPTIMIZED: Yaw optimization using pre-computed LOS data
+    // ----------------------------
+    // Key optimization: Pre-compute LOS ONCE, then iterate over yaw samples
+    // This reduces LOS calls from O(yaw_samples * frontier_cells) to O(frontier_cells)
+    std::pair<double, int> optimizeYaw(const geometry_msgs::msg::Point &vp_pos,
+                                       const frontier_exploration::msg::FrontierCluster &cluster,
+                                       const nav_msgs::msg::OccupancyGrid &map)
+    {
+        // Pre-compute all cell data including LOS (expensive, but done ONCE)
+        auto precomputed = precomputeCellData(vp_pos, cluster, map);
+
+        if (precomputed.empty())
+            return {0.0, 0};
+
+        const int samples = std::max(4, yaw_samples_);
+        double best_yaw = 0.0;
+        int best_cov = -1;
+
+        // Now iterate over yaw samples using FAST functions (no LOS calls)
+        for (int i = 0; i < samples; ++i)
+        {
+            const double yaw = (2.0 * M_PI * i) / static_cast<double>(samples) - M_PI;
+            const int cov = occlusion_enabled_
+                                ? computeCoverageOcclusionAwareFast(yaw, precomputed)
+                                : computeCoverageSimpleFast(yaw, precomputed);
+
+            if (cov > best_cov)
+            {
+                best_cov = cov;
+                best_yaw = yaw;
+            }
+        }
+
+        return {best_yaw, best_cov};
+    }
+
+    // Simple coverage: count LOS-visible frontier cells (no occlusion bin blocking)
+    int computeCoverageSimple(const geometry_msgs::msg::Point &vp_pos, double yaw,
+                              const frontier_exploration::msg::FrontierCluster &cluster,
+                              const nav_msgs::msg::OccupancyGrid &map)
+    {
+        const double range2 = sensor_range_ * sensor_range_;
+        const double half_fov = sensor_fov_h_ * 0.5;
+
+        int count = 0;
+        for (const auto &cell : cluster.cells)
+        {
+            const double dx = cell.x - vp_pos.x;
+            const double dy = cell.y - vp_pos.y;
+            const double d2 = dx * dx + dy * dy;
+            if (d2 > range2)
+                continue;
+
+            const double a = std::atan2(dy, dx);
+            if (angleDiff(a, yaw) > half_fov)
+                continue;
+
+            if (hasLineOfSight(vp_pos.x, vp_pos.y, cell.x, cell.y, map))
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // ----------------------------
+    // OPTIMIZED: Pre-computed cell data for yaw optimization
+    // ----------------------------
+    // Pre-compute LOS and distances ONCE per viewpoint, reuse across all yaw samples
+    struct PrecomputedCell
+    {
+        double ang;           // angle from viewpoint to cell
+        double dist;          // distance (pre-computed sqrt)
+        int ray_id;           // angular bin ID for occlusion
+        bool has_los;         // LOS result (computed once)
+        geometry_msgs::msg::Point p;
+    };
+
+    // Pre-compute all cell data including LOS for a given viewpoint position
+    std::vector<PrecomputedCell> precomputeCellData(
+        const geometry_msgs::msg::Point &vp_pos,
+        const frontier_exploration::msg::FrontierCluster &cluster,
+        const nav_msgs::msg::OccupancyGrid &map)
+    {
+        const double range2 = sensor_range_ * sensor_range_;
+        const double inv_bin = 1.0 / std::max(1e-6, occlusion_angle_bin_rad_);
+
+        std::vector<PrecomputedCell> cells;
+        cells.reserve(cluster.cells.size());
+
+        for (const auto &cell : cluster.cells)
+        {
+            const double dx = cell.x - vp_pos.x;
+            const double dy = cell.y - vp_pos.y;
+            const double d2 = dx * dx + dy * dy;
+            if (d2 > range2)
+                continue;
+
+            PrecomputedCell pc;
+            pc.ang = std::atan2(dy, dx);
+            pc.dist = std::sqrt(d2);  // sqrt computed ONCE per cell
+            pc.p = cell;
+
+            // Pre-compute ray_id for occlusion binning
+            const double norm_ang = normalizeAngle(pc.ang);
+            pc.ray_id = static_cast<int>(std::floor((norm_ang + M_PI) * inv_bin));
+
+            // Pre-compute LOS - this is the expensive operation, done ONCE
+            pc.has_los = hasLineOfSight(vp_pos.x, vp_pos.y, cell.x, cell.y, map);
+
+            cells.push_back(pc);
+        }
+
+        // Sort by angle then distance (done ONCE, not per yaw sample)
+        std::sort(cells.begin(), cells.end(),
+                  [](const PrecomputedCell &a, const PrecomputedCell &b)
+                  {
+                      if (std::abs(a.ang - b.ang) < 1e-9)
+                          return a.dist < b.dist;
+                      return a.ang < b.ang;
+                  });
+
+        return cells;
+    }
+
+    // Occlusion-aware coverage using pre-computed data (FAST - no LOS calls)
+    int computeCoverageOcclusionAwareFast(
+        double yaw,
+        const std::vector<PrecomputedCell> &precomputed_cells)
+    {
+        const double half_fov = sensor_fov_h_ * 0.5;
+
+        // blocked rays by ray_id
+        std::unordered_set<int> blocked;
+        blocked.reserve(256);
+
+        int count = 0;
+        for (const auto &c : precomputed_cells)
+        {
+            // Check FOV
+            if (angleDiff(c.ang, yaw) > half_fov)
+                continue;
+
+            // Check if this ray direction is already blocked
+            if (blocked.find(c.ray_id) != blocked.end())
+                continue;
+
+            // Use pre-computed LOS result (no Bresenham call!)
+            if (c.has_los)
+            {
+                count++;
+            }
+            else
+            {
+                // This direction is occluded -> block farther cells in same direction
+                blocked.insert(c.ray_id);
+            }
+        }
+
+        return count;
+    }
+
+    // Simple coverage using pre-computed data (FAST)
+    int computeCoverageSimpleFast(
+        double yaw,
+        const std::vector<PrecomputedCell> &precomputed_cells)
+    {
+        const double half_fov = sensor_fov_h_ * 0.5;
+
+        int count = 0;
+        for (const auto &c : precomputed_cells)
+        {
+            if (angleDiff(c.ang, yaw) > half_fov)
+                continue;
+
+            // Use pre-computed LOS result
+            if (c.has_los)
+                count++;
+        }
+        return count;
+    }
+
+    // Bresenham LOS on occupancy grid
+    bool hasLineOfSight(double x1, double y1, double x2, double y2,
+                        const nav_msgs::msg::OccupancyGrid &map)
+    {
+        auto [gx1, gy1] = worldToGrid(x1, y1, map);
+        auto [gx2, gy2] = worldToGrid(x2, y2, map);
+
+        const int width = static_cast<int>(map.info.width);
+        const int height = static_cast<int>(map.info.height);
+
+        int dx = std::abs(gx2 - gx1);
+        int dy = std::abs(gy2 - gy1);
+        int sx = (gx1 < gx2) ? 1 : -1;
+        int sy = (gy1 < gy2) ? 1 : -1;
+        int err = dx - dy;
+
+        int x = gx1;
+        int y = gy1;
+
+        while (true)
+        {
+            // Out of bounds -> treat as blocked
+            if (x < 0 || x >= width || y < 0 || y >= height)
+                return false;
+
+            const int idx = getIndex(x, y, width);
+            if (isOccupied(map.data[idx], occupied_threshold_))
+                return false;
+
+            if (x == gx2 && y == gy2)
+                break;
+
+            int e2 = 2 * err;
+            if (e2 > -dy)
+            {
+                err -= dy;
+                x += sx;
+            }
+            if (e2 < dx)
+            {
+                err += dx;
+                y += sy;
+            }
+        }
+
+        return true;
+    }
+
+private:
+    // Parameters
+    double sensor_range_{5.0};
+    double sensor_fov_h_{1.57};
+
+    double min_dist_{1.5}, max_dist_{4.0};
+    int num_dist_samples_{3}, num_angle_samples_{12};
+    int min_coverage_{3}, max_viewpoints_{5};
+
+    int8_t free_threshold_{25}, occupied_threshold_{65};
+
+    // Robot footprint
+    double robot_width_{0.5}, robot_length_{0.5}, robot_height_{0.3};
+    double safety_margin_{0.3};
+    double clearance_radius_{0.0};
+    double flight_height_{1.5}, height_tolerance_{0.2};
+
+    // Stabilization
+    double vp_hysteresis_distance_{1.0};
+    double vp_hysteresis_coverage_{1.3};
+    double vp_tracking_timeout_{5.0};
+    bool vp_stabilization_enabled_{true};
+
+    // Occlusion-aware coverage
+    bool occlusion_enabled_{true};
+    double occlusion_angle_bin_rad_{0.02};
+    int yaw_samples_{36};
+
+    // NEW: Viewpoint quality filters
+    bool require_los_to_centroid_{true};
+    double min_coverage_ratio_{0.2};
+    bool use_normal_sampling_{true};
+    double normal_angle_range_{2.094};  // ~120 degrees
+
+    // Maps
+    nav_msgs::msg::OccupancyGrid::SharedPtr current_map_;
+    std::shared_ptr<octomap::OcTree> current_octree_;
+
+    // ROS
+    rclcpp::Subscription<frontier_exploration::msg::FrontierArray>::SharedPtr clusters_sub_;
+    rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr map_sub_;
+    rclcpp::Subscription<octomap_msgs::msg::Octomap>::SharedPtr octomap_sub_;
+    rclcpp::Publisher<frontier_exploration::msg::FrontierArray>::SharedPtr clusters_pub_;
 };
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<ViewpointGeneratorNode>());
-  rclcpp::shutdown();
-  return 0;
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<ViewpointGeneratorNode>());
+    rclcpp::shutdown();
+    return 0;
 }

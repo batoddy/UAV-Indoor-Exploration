@@ -5,10 +5,11 @@ frontier_detector:
   ros__parameters:
     map_topic: "/map"
     min_frontier_size: 5       # Min cells for valid cluster
-    max_cluster_size: 20      # Max cells before PCA split
+    max_cluster_size: 27       # Max cells before PCA split
     free_threshold: 25         # Occupancy < this = free
     occupied_threshold: 65     # Occupancy >= this = occupied
     pca_split_threshold: 2.0   # Eigenvalue threshold for splitting
+    require_occupied_neighbor: false  # Filter frontiers without occupied neighbors
 
 # ============ Node 2: Viewpoint Generator ============
 viewpoint_generator:
@@ -16,31 +17,55 @@ viewpoint_generator:
     # Sensor model
     sensor_range: 3.0          # Max sensing range (m)
     sensor_fov_h: 1.57         # Horizontal FOV (~90°)
-    
+
     # Cylindrical sampling
     min_dist: 1.5              # Min distance from cluster (safety buffer)
     max_dist: 3.0              # Max distance from cluster
     num_dist_samples: 3        # Radial samples
-    num_angle_samples: 12      # Angular samples (every 30°)
-    
+    num_angle_samples: 16      # Angular samples (every 22.5°) - increased for normal sampling
+
     # Filtering
-    min_coverage: 3            # Min visible cells
+    min_coverage: 3            # Min visible cells (absolute minimum)
     max_viewpoints: 5          # Max VPs per cluster
-    
+
     free_threshold: 25
     occupied_threshold: 65
-    
+
     # Robot footprint - for collision checking
     robot_width: 1.0           # [m] Robot width (X axis)
     robot_length: 1.0          # [m] Robot length (Y axis)
     robot_height: 0.3          # [m] Robot height (Z axis) - for 3D check
     safety_margin: 0.3         # [m] Extra clearance around robot
-    
+
     # 3D checking parameters
     flight_height: 1.5         # [m] Nominal flight height
     height_tolerance: 0.5      # [m] Check obstacles in this Z range
-    
-    # Total clearance = sqrt(0.5² + 0.5²)/2 + 0.3 = 0.65m from obstacles
+
+    # Viewpoint stabilization
+    vp_stabilization_enabled: true
+    vp_hysteresis_distance: 1.0   # [m] Keep old VP if new one is within this distance
+    vp_hysteresis_coverage: 1.3   # Multiplier: new must be > old * this to replace
+    vp_tracking_timeout: 5.0      # [s] Reset tracking after this timeout
+
+    # Occlusion-aware coverage
+    occlusion_enabled: true
+    occlusion_angle_bin_rad: 0.02  # Angular bin size for ray binning (~1.15°)
+    yaw_samples: 36                # Yaw optimization samples
+
+    # ============ NEW: Viewpoint Quality Filters ============
+    # These prevent viewpoints from being placed behind obstacles
+
+    # LOS to centroid: Reject viewpoints that can't see the cluster centroid
+    require_los_to_centroid: true
+
+    # Percentage-based coverage: VP must see at least this % of frontier cells
+    # Combined with min_coverage: actual_min = max(min_coverage, cluster_size * ratio)
+    min_coverage_ratio: 0.2        # 20% of frontier cells must be visible
+
+    # Normal-direction sampling: Only sample viewpoints on the "free space" side
+    # This uses PCA to find the frontier orientation and samples towards explored area
+    use_normal_sampling: true
+    normal_angle_range: 2.094      # Sample within ±60° of normal (120° total, ~2.094 rad)
 
 # ============ Node 3: Cost Computer ============
 cost_computer:

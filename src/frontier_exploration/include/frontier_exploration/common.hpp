@@ -81,6 +81,12 @@ inline bool isOccupied(int8_t value, int8_t occupied_threshold = 65) {
   return value >= occupied_threshold;
 }
 
+// ============ 4-Connected Neighbors ============
+
+const std::vector<std::pair<int, int>> NEIGHBORS_4 = {
+  {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+};
+
 // ============ 8-Connected Neighbors ============
 
 const std::vector<std::pair<int, int>> NEIGHBORS_8 = {

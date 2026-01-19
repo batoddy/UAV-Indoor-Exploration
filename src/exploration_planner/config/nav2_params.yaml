@@ -1,0 +1,69 @@
+# ==============================================================================
+# NAV2 PARAMETERS - Planner Server with Global Costmap
+# ==============================================================================
+
+planner_server:
+  ros__parameters:
+    expected_planner_frequency: 5.0
+    planner_plugins: ["GridBased"]
+
+    GridBased:
+      plugin: "nav2_navfn_planner/NavfnPlanner"
+      tolerance: 0.5
+      use_astar: true
+      allow_unknown: true
+
+    # Global Costmap (nested inside planner_server)
+    global_costmap:
+      global_costmap:
+        ros__parameters:
+          update_frequency: 5.0
+          publish_frequency: 2.0        # Publish more frequently for RViz visibility
+          global_frame: map
+          robot_base_frame: base_link
+          
+          # ⭐ QoS Settings - KRITIK: RViz'in alması için gerekli
+          # Nav2 costmap varsayılan olarak Best Effort + Volatile yayınlıyor
+          # RViz ise Reliable + Transient Local bekliyor → UYUMSUZ!
+          costmap_publish_frequency: 2.0
+
+          # Costmap dimensions
+          width: 100
+          height: 100
+          resolution: 0.1
+          origin_x: -50.0
+          origin_y: -50.0
+
+          # Rolling window disabled for global map
+          rolling_window: false
+          track_unknown_space: true
+
+          # Always publish full costmap for visibility
+          always_send_full_costmap: true
+
+          # Robot footprint
+          robot_radius: 0.6
+
+          # ⭐ QoS PROFILI (Publisher side)
+          # Nav2 default = Best Effort + Volatile
+          # Değiştir: Reliable + Transient Local (RViz ile uyumlu)
+          # Not: Nav2 v0.4.10+ versiyonlarda bu parametreler doğrudan desteklenmeyebilir
+          # Alternatif: env variable veya code patch gerekebilir
+
+          # Plugins
+          plugins: ["static_layer", "inflation_layer"]
+
+          static_layer:
+            plugin: "nav2_costmap_2d::StaticLayer"
+            map_topic: /map
+            map_subscribe_transient_local: true
+            subscribe_to_updates: true
+            # ⭐ RViz'in görmesi için gerekli - OctoMap'ten gelen harita
+            # transient_local = True: RViz önceki mesajları görebilir
+            # enabled: true
+
+          inflation_layer:
+            plugin: "nav2_costmap_2d::InflationLayer"
+            cost_scaling_factor: 3.0
+            inflation_radius: 0.8
+            enabled: true

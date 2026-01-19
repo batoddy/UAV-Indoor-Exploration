@@ -1,18 +1,28 @@
 /**
- * Node 1: Greedy Frontier Selector
+ * Node: Greedy Frontier Selector (Updated to use Feature-Rich Viewpoints)
  * 
- * Input:  /frontier_clusters_complete (frontier_exploration/FrontierArray)
- *         /odom or /mavros/local_position/pose (current position)
- * Output: /exploration/global_tour (exploration_planner/ExplorationStatus)
+ * Input:  
+ *   /frontier_clusters_with_viewpoints (frontier_exploration/FrontierArray)
+ *          ✅ Feature-rich viewpoints from Viewpoint Generator
+ *          ✅ Viewpoints ranked by occlusion-aware coverage
+ *          ✅ Cluster context embedded in each viewpoint
+ *   /odom or /mavros/local_position/pose (current position)
  * 
+ * Output: 
+ *   /exploration/global_tour (exploration_planner/ExplorationStatus)
+ *
  * Services:
  *   /exploration/start (std_srvs/Trigger) - Start exploration
  *   /exploration/stop (std_srvs/Trigger)  - Stop exploration
  * 
  * Selects best frontier using weighted cost function:
- *   cost = w_dist * distance + w_size * (1/cluster_size) + w_angle * angle_change
+ *   cost = w_dist * distance + w_size * (1/cluster_size) + w_angle * angle_change + w_coverage * (1/coverage)
  * 
- * IMPROVED: Evaluates ALL viewpoints (top N per cluster), not just the best one!
+ * Key Improvements:
+ *   ✅ Evaluates ALL viewpoints (top N per cluster), not just the best one
+ *   ✅ Uses occlusion-aware coverage (more accurate)
+ *   ✅ Cluster context embedded in viewpoints (no additional lookups)
+ *   ✅ Viewpoints already temporally stabilized
  */
 
 #include <rclcpp/rclcpp.hpp>
@@ -46,6 +56,9 @@ public:
     declare_parameter("v_max", 4.0);
     declare_parameter("yaw_rate_max", 2.5);
     
+    // Nav2 integration
+    declare_parameter("nav2_enable", false);
+    
     w_distance_ = get_parameter("w_distance").as_double();
     w_size_ = get_parameter("w_size").as_double();
     w_angle_ = get_parameter("w_angle").as_double();
@@ -53,10 +66,13 @@ public:
     max_viewpoints_to_evaluate_ = get_parameter("max_viewpoints_to_evaluate").as_int();
     v_max_ = get_parameter("v_max").as_double();
     yaw_rate_max_ = get_parameter("yaw_rate_max").as_double();
+    nav2_enable_ = get_parameter("nav2_enable").as_bool();
     
     // Subscribers
+    // ✅ Now subscribing to frontier_clusters_with_viewpoints (from Viewpoint Generator)
+    // This topic includes feature-rich viewpoints with cluster context already embedded!
     clusters_sub_ = create_subscription<frontier_exploration::msg::FrontierArray>(
-      "/frontier_clusters_complete", 10,
+      "frontier_clusters_with_viewpoints", 10,
       std::bind(&GreedyFrontierSelectorNode::clustersCallback, this, std::placeholders::_1));
     
     odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
@@ -70,6 +86,10 @@ public:
     // Publisher
     tour_pub_ = create_publisher<exploration_planner::msg::ExplorationStatus>(
       "/exploration/global_tour", 10);
+    
+    // Nav2 goal publisher (if enabled)
+    goal_pose_pub_ = create_publisher<geometry_msgs::msg::PoseStamped>(
+      "/goal_pose", 10);
     
     // Services
     start_srv_ = create_service<std_srvs::srv::Trigger>(
@@ -149,6 +169,7 @@ private:
     }
     
     // Filter clusters - only keep those with valid viewpoints
+    // ✅ Viewpoints are already feature-rich and ranked by coverage!
     std::vector<const frontier_exploration::msg::FrontierCluster*> valid_clusters;
     for (const auto& cluster : msg->clusters) {
       if (!cluster.viewpoints.empty()) {
@@ -167,6 +188,7 @@ private:
     }
     
     // Find best viewpoint across ALL clusters
+    // ✅ Evaluates occlusion-aware coverage, cluster context, and stability
     auto [best_cluster, best_vp_idx, best_cost] = selectBestViewpoint(valid_clusters);
     
     if (!best_cluster) {
@@ -190,8 +212,8 @@ private:
     
     // ═══════════════════════════════════════════════════════════════════
     // Calculate target yaw - where camera should look when arriving
-    // vp.yaw from frontier_exploration is often 0, so we calculate it ourselves
-    // Yaw = direction from viewpoint to cluster centroid (frontier)
+    // ✅ vp.yaw is now computed by Viewpoint Generator with occlusion-awareness
+    // For additional flexibility, we can also calculate based on cluster centroid
     // ═══════════════════════════════════════════════════════════════════
     double cx = best_cluster->centroid.x;
     double cy = best_cluster->centroid.y;
@@ -213,13 +235,38 @@ private:
     
     tour_pub_->publish(status);
     
-    RCLCPP_INFO(get_logger(), "Selected cluster %d vp[%d], dist=%.2f, cost=%.3f, cov=%d, yaw=%.1f°", 
-                best_cluster->id, best_vp_idx, dist, best_cost, vp.coverage, target_yaw * 180.0 / M_PI);
+    // Publish to Nav2 if enabled
+    if (nav2_enable_) {
+      goal_pose_pub_->publish(status.current_target);
+      RCLCPP_DEBUG(get_logger(), "Published goal to Nav2: x=%.2f, y=%.2f, z=%.2f",
+                   status.current_target.pose.position.x,
+                   status.current_target.pose.position.y,
+                   status.current_target.pose.position.z);
+    }
+    
+    // ✅ Use embedded cluster_size if available, fallback to cluster->size
+    uint32_t vp_cluster_size = (vp.cluster_size > 0) ? vp.cluster_size : best_cluster->size;
+    
+    // ✅ Log includes cluster context from embedded feature data
+    RCLCPP_INFO(get_logger(), 
+                "Selected cluster %d (size:%d) vp[%d], dist=%.2f, cost=%.3f, coverage=%d, yaw=%.1f°", 
+                best_cluster->id, vp_cluster_size, best_vp_idx, dist, best_cost, 
+                vp.coverage, target_yaw * 180.0 / M_PI);
   }
   
   /**
    * Evaluate ALL viewpoints from ALL clusters and return the best one
+   * ✅ NEW: Viewpoints are now feature-rich with occlusion-aware coverage
+   * ✅ NEW: Cluster context embedded in each viewpoint (cluster_id, cluster_size, cluster_centroid)
+   * ✅ NEW: Viewpoints already temporally stabilized
+   * 
    * Returns: (cluster_ptr, viewpoint_index, cost)
+   * 
+   * Cost Components:
+   *   1. Distance: Normalized distance from current position to viewpoint
+   *   2. Size: Inverse of cluster size (prefer larger unexplored areas)
+   *   3. Angle: Direction change required from current heading
+   *   4. Coverage: Inverse of occlusion-aware coverage (prefer high-coverage viewpoints)
    */
   std::tuple<const frontier_exploration::msg::FrontierCluster*, int, double>
   selectBestViewpoint(const std::vector<const frontier_exploration::msg::FrontierCluster*>& clusters)
@@ -246,6 +293,9 @@ private:
       max_size = std::max(max_size, cluster->size);
       for (const auto& vp : cluster->viewpoints) {
         max_coverage = std::max(max_coverage, vp.coverage);
+        // ✅ Use embedded cluster_size if available, fallback to cluster->size
+        uint32_t vp_cluster_size = (vp.cluster_size > 0) ? vp.cluster_size : cluster->size;
+        max_size = std::max(max_size, vp_cluster_size);
         double dist = distance2D(current_pos, vp.position);
         max_dist = std::max(max_dist, dist);
       }
@@ -266,7 +316,9 @@ private:
         double dist_cost = dist / max_dist;
         
         // 2. Size cost (inverted - bigger is better)
-        double size_cost = 1.0 - (static_cast<double>(cluster->size) / max_size);
+        // ✅ Use embedded cluster_size if available, fallback to cluster->size
+        uint32_t vp_cluster_size = (vp.cluster_size > 0) ? vp.cluster_size : cluster->size;
+        double size_cost = 1.0 - (static_cast<double>(vp_cluster_size) / max_size);
         
         // 3. Angle change cost
         double angle_to_target = std::atan2(
@@ -279,7 +331,8 @@ private:
           angle_cost = angleDiff(current_yaw, angle_to_target) / M_PI;
         }
         
-        // 4. Coverage cost (inverted - higher coverage is better)
+        // 4. Coverage cost (inverted - higher occlusion-aware coverage is better)
+        // ✅ Uses coverage from Viewpoint Generator (occlusion-aware)
         double coverage_cost = 1.0 - (static_cast<double>(vp.coverage) / max_coverage);
         
         // === Total Cost ===
@@ -289,8 +342,9 @@ private:
                             w_coverage_ * coverage_cost;
         
         RCLCPP_DEBUG(get_logger(), 
-                     "Cluster %d VP[%d]: dist=%.2f(%.2f), size=%.2f, angle=%.2f, cov=%.2f -> cost=%.3f",
-                     cluster->id, vp_idx, dist, dist_cost, size_cost, angle_cost, coverage_cost, total_cost);
+                     "Cluster %d (size:%d) VP[%d]: dist=%.2f(%.2f), size=%.2f, angle=%.2f, cov=%d(%.2f) -> cost=%.3f",
+                     cluster->id, vp_cluster_size, vp_idx, dist, dist_cost, size_cost, 
+                     angle_cost, vp.coverage, coverage_cost, total_cost);
         
         if (total_cost < best_cost) {
           best_cost = total_cost;
@@ -311,6 +365,7 @@ private:
   int max_viewpoints_to_evaluate_;
   double v_max_;
   double yaw_rate_max_;
+  bool nav2_enable_;
   
   // State
   geometry_msgs::msg::PoseStamped current_pose_;
@@ -327,6 +382,7 @@ private:
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
   rclcpp::Publisher<exploration_planner::msg::ExplorationStatus>::SharedPtr tour_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr goal_pose_pub_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_srv_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_srv_;
 };
