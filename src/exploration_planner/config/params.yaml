@@ -10,12 +10,20 @@
     # ==========================================================================
     # GLOBAL MOTION LIMITS
     # ==========================================================================
-    v_max: 2.5               # [m/s] Maximum linear velocity
-    yaw_rate_max: 3.0        # [rad/s] Maximum yaw rate
+    # v_max: 2.5               # [m/s] Maximum linear velocity
+    # yaw_rate_max: 3.0        # [rad/s] Maximum yaw rate
 
-    a_max: 0.9                   # [m/s²] Max linear acceleration (was 0.7, now faster)
-    yaw_accel_max: 1.5           # [rad/s²] Max yaw acceleration (was 1.0)
+    # a_max: 0.9                   # [m/s²] Max linear acceleration (was 0.7, now faster)
+    # yaw_accel_max: 1.5           # [rad/s²] Max yaw acceleration (was 1.0)
     
+    # ==========================================================================
+    v_max: 2.0               # [m/s] Maximum linear velocity
+    yaw_rate_max: 2.0        # [rad/s] Maximum yaw rate
+
+    a_max: 0.3                   # [m/s²] Max linear acceleration (was 0.7, now faster)
+    yaw_accel_max: 0.7          # [rad/s²] Max yaw acceleration (was 1.0)
+
+
     # ==========================================================================
     # ROBOT FOOTPRINT
     # ==========================================================================

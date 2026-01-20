@@ -51,7 +51,7 @@ Node(
         'resolution': 0.20,
         'frame_id': 'map',
         'base_frame_id': 'base_link',
-        
+        'transform_tolerance' : 1.0,
         # ============ SENSÖR MODELİ ============
         'sensor_model.max_range': 7.5,         # Azaltıldı - uzak noktalar güvenilmez
         'sensor_model.min_range': 0.1,
