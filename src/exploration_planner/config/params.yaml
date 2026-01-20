@@ -155,3 +155,11 @@
     trail_enabled: true           # Trail gorsellestirmesini aktif et
     trail_max_points: 5000        # Maksimum trail nokta sayisi (FIFO)
     trail_min_distance: 0.1       # [m] Trail noktalari arasi minimum mesafe
+
+    # ==========================================================================
+    # TELEMETRY NODE
+    # ==========================================================================
+    # Gercek zamanli telemetri takibi ve CSV loglama
+    publish_rate: 30.0            # [Hz] Telemetri yayinlama frekansi
+    logging_enabled: false        # CSV loglama aktif/pasif
+    log_file_path: "/tmp/exploration_telemetry.csv"  # CSV log dosya yolu

@@ -229,10 +229,16 @@ private:
     status.total_waypoints = 1;
     
     // Estimate time
-    double dist = distance2D(current_pose_.pose.position, waypoint.pose.position);
+        double dist = distance2D(current_pose_.pose.position, waypoint.pose.position);
     status.estimated_time_remaining = dist / v_max_;
     status.total_distance_remaining = dist;
-    
+
+    // Target viewpoint info for telemetry
+    status.target_coverage = static_cast<double>(vp.coverage);
+    status.target_cluster_id = best_cluster->id;
+    uint32_t vp_cluster_size = (vp.cluster_size > 0) ? vp.cluster_size : best_cluster->size;
+    status.target_cluster_size = vp_cluster_size;
+
     tour_pub_->publish(status);
     
     // Publish to Nav2 if enabled
@@ -243,9 +249,6 @@ private:
                    status.current_target.pose.position.y,
                    status.current_target.pose.position.z);
     }
-    
-    // ✅ Use embedded cluster_size if available, fallback to cluster->size
-    uint32_t vp_cluster_size = (vp.cluster_size > 0) ? vp.cluster_size : best_cluster->size;
     
     // ✅ Log includes cluster context from embedded feature data
     RCLCPP_INFO(get_logger(), 

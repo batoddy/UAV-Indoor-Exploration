@@ -23,6 +23,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ExplorationStatus.msg"
   "msg/Trajectory.msg"
+  "msg/TelemetryStatus.msg"
   DEPENDENCIES geometry_msgs std_msgs
 )
 
@@ -71,6 +72,11 @@ add_executable(exploration_visualizer_node src/exploration_visualizer_node.cpp)
 ament_target_dependencies(exploration_visualizer_node ${COMMON_DEPS})
 target_link_libraries(exploration_visualizer_node "${cpp_typesupport_target}")
 
+# ============ Telemetry Node ============
+add_executable(telemetry_node src/telemetry_node.cpp)
+ament_target_dependencies(telemetry_node ${COMMON_DEPS})
+target_link_libraries(telemetry_node "${cpp_typesupport_target}")
+
 install(TARGETS
   global_tour_planner_node
   nav2_path_planner_node
@@ -78,6 +84,7 @@ install(TARGETS
   trajectory_generator_node
   trajectory_follower_node
   exploration_visualizer_node
+  telemetry_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

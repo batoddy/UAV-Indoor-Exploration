@@ -17,7 +17,9 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include "exploration_planner/msg/exploration_status.hpp"
 #include "exploration_planner/msg/trajectory.hpp"
+#include "exploration_planner/msg/telemetry_status.hpp"
 #include "exploration_planner/common.hpp"
+#include <cmath>
 
 using namespace exploration_planner;
 
@@ -59,7 +61,11 @@ public:
     odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
       "/odom", 10,
       std::bind(&ExplorationVisualizerNode::odomCallback, this, std::placeholders::_1));
-    
+
+    telemetry_sub_ = create_subscription<exploration_planner::msg::TelemetryStatus>(
+      "/exploration/telemetry", 10,
+      std::bind(&ExplorationVisualizerNode::telemetryCallback, this, std::placeholders::_1));
+
     // Publishers
     marker_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>(
       "/exploration/markers", 10);
@@ -161,6 +167,12 @@ private:
   {
     current_trajectory_ = msg;
     publishMarkers();
+  }
+
+  void telemetryCallback(const exploration_planner::msg::TelemetryStatus::SharedPtr msg)
+  {
+    current_telemetry_ = msg;
+    // Telemetry updates frequently; no need to republish all markers each time
   }
   
   void publishMarkers()
@@ -387,7 +399,50 @@ private:
       status_text.text = ss.str();
       markers.markers.push_back(status_text);
     }
-    
+
+    // === Telemetry Panel (top-left corner in RViz) ===
+    if (current_telemetry_) {
+      visualization_msgs::msg::Marker telemetry_panel;
+      telemetry_panel.header.frame_id = frame;
+      telemetry_panel.header.stamp = stamp;
+      telemetry_panel.ns = "telemetry";
+      telemetry_panel.id = id++;
+      telemetry_panel.type = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+      telemetry_panel.action = visualization_msgs::msg::Marker::ADD;
+
+      // Position in world coordinates (will appear relative to camera in RViz)
+      telemetry_panel.pose.position.x = -5.0;
+      telemetry_panel.pose.position.y = 5.0;
+      telemetry_panel.pose.position.z = 3.0;
+      telemetry_panel.scale.z = 0.35;
+
+      // Cyan color for telemetry panel
+      telemetry_panel.color.r = 0.0;
+      telemetry_panel.color.g = 1.0;
+      telemetry_panel.color.b = 1.0;
+      telemetry_panel.color.a = 1.0;
+
+      std::stringstream ts;
+      ts << "=== TELEMETRY ===\n";
+      ts << std::fixed << std::setprecision(2);
+      ts << "Speed: " << current_telemetry_->velocity_horizontal << " m/s\n";
+      ts << "Avg Speed: " << current_telemetry_->average_velocity << " m/s\n";
+      ts << "Accel: " << current_telemetry_->acceleration_magnitude << " m/s2\n";
+      ts << std::setprecision(0);
+      ts << "Yaw: " << (current_telemetry_->current_yaw * 180.0 / M_PI) << " deg\n";
+      ts << "Target Yaw: " << (current_telemetry_->target_yaw * 180.0 / M_PI) << " deg\n";
+      ts << std::setprecision(2);
+      ts << "Dist to Goal: " << current_telemetry_->distance_to_goal << " m\n";
+      ts << "Waypoint: " << current_telemetry_->current_waypoint_index + 1
+         << "/" << current_telemetry_->total_waypoints << "\n";
+      ts << std::setprecision(1);
+      ts << "Path Traveled: " << current_telemetry_->total_path_traveled << " m\n";
+      ts << "Session: " << static_cast<int>(current_telemetry_->session_time) << " s";
+
+      telemetry_panel.text = ts.str();
+      markers.markers.push_back(telemetry_panel);
+    }
+
     marker_pub_->publish(markers);
   }
   
@@ -405,6 +460,7 @@ private:
   exploration_planner::msg::ExplorationStatus::SharedPtr global_tour_;
   exploration_planner::msg::ExplorationStatus::SharedPtr refined_tour_;
   exploration_planner::msg::Trajectory::SharedPtr current_trajectory_;
+  exploration_planner::msg::TelemetryStatus::SharedPtr current_telemetry_;
   geometry_msgs::msg::Pose current_pose_;
   bool have_pose_ = false;
   
@@ -416,6 +472,7 @@ private:
   rclcpp::Subscription<exploration_planner::msg::ExplorationStatus>::SharedPtr refined_tour_sub_;
   rclcpp::Subscription<exploration_planner::msg::Trajectory>::SharedPtr trajectory_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
+  rclcpp::Subscription<exploration_planner::msg::TelemetryStatus>::SharedPtr telemetry_sub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr footprint_pub_;
   rclcpp::TimerBase::SharedPtr footprint_timer_;

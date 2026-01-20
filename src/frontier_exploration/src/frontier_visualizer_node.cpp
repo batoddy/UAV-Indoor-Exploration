@@ -169,21 +169,20 @@ private:
         fov.color.a = 0.7;
         markers.markers.push_back(fov);
         
-        // Coverage text for best
-        if (is_best) {
-          visualization_msgs::msg::Marker text;
-          text.header = centroid.header;
-          text.ns = "vp_info";
-          text.id = id++;
-          text.type = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
-          text.action = visualization_msgs::msg::Marker::ADD;
-          text.pose.position = vp.position;
-          text.pose.position.z = 1.0;
-          text.scale.z = 0.2;
-          text.color = createColor(1, 1, 1, 1);
-          text.text = "cov:" + std::to_string(vp.coverage);
-          markers.markers.push_back(text);
-        }
+    
+        visualization_msgs::msg::Marker text;
+        text.header = centroid.header;
+        text.ns = "vp_info";
+        text.id = id++;
+        text.type = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+        text.action = visualization_msgs::msg::Marker::ADD;
+        text.pose.position = vp.position;
+        text.pose.position.z = 1.0;
+        text.scale.z = 0.2;
+        text.color = createColor(1, 1, 1, 1);
+        text.text = "cov:" + std::to_string(vp.coverage);
+        markers.markers.push_back(text);
+        
       }
       
       // === Connection lines ===

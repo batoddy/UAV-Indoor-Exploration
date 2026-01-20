@@ -23,3 +23,8 @@ uint32 current_waypoint_index
 uint32 total_waypoints
 float64 estimated_time_remaining
 float64 total_distance_remaining
+
+# Target viewpoint info
+float64 target_coverage         # Current target viewpoint coverage
+uint32 target_cluster_id        # Current target cluster ID
+uint32 target_cluster_size      # Current target cluster size

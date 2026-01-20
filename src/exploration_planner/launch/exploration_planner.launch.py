@@ -110,6 +110,14 @@ def generate_launch_description():
             output='screen'
         ),
 
+        Node(
+            package='exploration_planner',
+            executable='telemetry_node',
+            name='telemetry_node',
+            parameters=[params_file, {'use_sim_time': use_sim_time}],
+            output='screen'
+        ),
+
         # ============================================================
         # OPTIONAL
         # ============================================================
