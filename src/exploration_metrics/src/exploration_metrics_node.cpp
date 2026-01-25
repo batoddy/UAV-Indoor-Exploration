@@ -432,17 +432,10 @@ private:
                       << "path_traveled,"
                       // Exploration metrics
                       << "exploration_pct,"
-                      << "og_pct,"
-                      << "octomap_pct,"
+                      << "2d_pct,"
+                      << "3d_pct,"
                       << "exploration_rate,"
-                      << "avg_exploration_rate,"
-                      // Map statistics
-                      << "gt_known_cells,"
-                      << "current_known_cells,"
-                      << "matched_cells,"
-                      << "free_ratio,"
-                      << "occupied_ratio,"
-                      << "unknown_ratio"
+                      << "avg_exploration_rate"
                       << std::endl;
 
             RCLCPP_INFO(get_logger(), "CSV file created: %s", current_log_file_.c_str());
@@ -484,17 +477,10 @@ private:
                   << telemetry.total_path_traveled << ","
                   // Exploration metrics (from last published)
                   << last_exploration_pct_ << ","
-                  << last_og_pct_ << ","
-                  << last_octomap_pct_ << ","
+                  << last_2d_pct_ << ","
+                  << last_3d_pct_ << ","
                   << last_exploration_rate_ << ","
-                  << avg_exploration_rate_ << ","
-                  // Map statistics
-                  << gt_known_cells_ << ","
-                  << last_current_known_cells_ << ","
-                  << last_matched_cells_ << ","
-                  << last_free_ratio_ << ","
-                  << last_occupied_ratio_ << ","
-                  << last_unknown_ratio_
+                  << avg_exploration_rate_
                   << std::endl;
 
         // Periodic flush
@@ -561,11 +547,11 @@ private:
         // Calculate overall exploration percentage
         if (comparison_mode_ == "both") {
             metrics_msg.exploration_percentage =
-                (metrics_msg.occupancy_grid_percentage + metrics_msg.octomap_percentage) / 2.0;
+                (metrics_msg.exploration_2d_percentage + metrics_msg.exploration_3d_percentage) / 2.0;
         } else if (comparison_mode_ == "occupancy_grid") {
-            metrics_msg.exploration_percentage = metrics_msg.occupancy_grid_percentage;
+            metrics_msg.exploration_percentage = metrics_msg.exploration_2d_percentage;
         } else {
-            metrics_msg.exploration_percentage = metrics_msg.octomap_percentage;
+            metrics_msg.exploration_percentage = metrics_msg.exploration_3d_percentage;
         }
 
         // Calculate exploration rate
@@ -593,30 +579,17 @@ private:
                                         (1.0 - ema_alpha_) * avg_exploration_rate_;
             }
             metrics_msg.avg_exploration_rate = avg_exploration_rate_;
-
-            if (avg_exploration_rate_ > 0.001) {
-                double remaining = 100.0 - metrics_msg.exploration_percentage;
-                metrics_msg.estimated_completion_time = remaining / avg_exploration_rate_;
-            } else {
-                metrics_msg.estimated_completion_time = -1.0;
-            }
         } else {
             // Keep previous values instead of resetting to 0
             metrics_msg.exploration_rate = last_exploration_rate_;
             metrics_msg.avg_exploration_rate = avg_exploration_rate_ >= 0 ? avg_exploration_rate_ : 0.0;
-            metrics_msg.estimated_completion_time = -1.0;
         }
 
         // Store for CSV logging
         last_exploration_pct_ = metrics_msg.exploration_percentage;
-        last_og_pct_ = metrics_msg.occupancy_grid_percentage;
-        last_octomap_pct_ = metrics_msg.octomap_percentage;
+        last_2d_pct_ = metrics_msg.exploration_2d_percentage;
+        last_3d_pct_ = metrics_msg.exploration_3d_percentage;
         last_exploration_rate_ = metrics_msg.exploration_rate;
-        last_current_known_cells_ = metrics_msg.current_known_cells;
-        last_matched_cells_ = metrics_msg.matched_cells;
-        last_free_ratio_ = metrics_msg.free_space_ratio;
-        last_occupied_ratio_ = metrics_msg.occupied_space_ratio;
-        last_unknown_ratio_ = metrics_msg.unknown_space_ratio;
 
         last_exploration_percentage_ = metrics_msg.exploration_percentage;
         last_elapsed_time_ = time_for_rate;
@@ -629,12 +602,12 @@ private:
         if (exploration_active_ && static_cast<int>(metrics_msg.exploration_duration) % 10 == 0 &&
             metrics_msg.exploration_duration > 0.5) {
             RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 10000,
-                "[%s] Exploration: %.1f%% | Rate: %.2f%%/s | Path: %.1fm | ETA: %.0fs",
+                "[%s] 2D: %.1f%% | 3D: %.1f%% | Rate: %.2f%%/s | Path: %.1fm",
                 map_name_.c_str(),
-                metrics_msg.exploration_percentage,
+                metrics_msg.exploration_2d_percentage,
+                metrics_msg.exploration_3d_percentage,
                 metrics_msg.avg_exploration_rate,
-                telemetry_received_ ? latest_telemetry_.total_path_traveled : 0.0,
-                metrics_msg.estimated_completion_time);
+                telemetry_received_ ? latest_telemetry_.total_path_traveled : 0.0);
         }
     }
 
@@ -642,15 +615,8 @@ private:
     {
         if (!current_map_ || gt_known_cells_ == 0) return;
 
-        int matched = 0;
-        int current_known = 0;
-        int current_free = 0;
-        int current_occupied = 0;
-        int current_unknown = 0;
-
-        int gt_free_matched = 0, gt_free_total = 0;
-        int gt_occupied_matched = 0, gt_occupied_total = 0;
-        int curr_free_total = 0, curr_occupied_total = 0;
+        int matched = 0;      // GT ile aynı konumda VE aynı değerde
+        int mismatched = 0;   // GT ile aynı konumda AMA farklı değerde
 
         double gt_resolution = gt_occupancy_grid_.info.resolution;
         double gt_origin_x = gt_occupancy_grid_.info.origin.position.x;
@@ -669,13 +635,11 @@ private:
                 int gt_idx = gy * gt_width + gx;
                 int8_t gt_val = gt_occupancy_grid_.data[gt_idx];
 
+                // GT'de unknown ise atla
                 if (gt_val == -1) continue;
 
                 bool gt_free = (gt_val < free_threshold_);
                 bool gt_occupied = (gt_val >= occupied_threshold_);
-
-                if (gt_free) gt_free_total++;
-                if (gt_occupied) gt_occupied_total++;
 
                 double wx = gt_origin_x + (gx + 0.5) * gt_resolution;
                 double wy = gt_origin_y + (gy + 0.5) * gt_resolution;
@@ -683,88 +647,79 @@ private:
                 int cx = static_cast<int>((wx - curr_origin_x) / curr_resolution);
                 int cy = static_cast<int>((wy - curr_origin_y) / curr_resolution);
 
+                // Sınır dışı ise atla (henüz keşfedilmemiş sayılır)
                 if (cx < 0 || cx >= curr_width || cy < 0 || cy >= curr_height) continue;
 
                 int curr_idx = cy * curr_width + cx;
                 int8_t curr_val = current_map_->data[curr_idx];
 
-                if (curr_val != -1) {
-                    current_known++;
-                    bool curr_free = (curr_val < free_threshold_);
-                    bool curr_occupied = (curr_val >= occupied_threshold_);
+                // Anlık haritada unknown ise atla (henüz keşfedilmemiş)
+                if (curr_val == -1) continue;
 
-                    if (curr_free) {
-                        current_free++;
-                        curr_free_total++;
-                    }
-                    if (curr_occupied) {
-                        current_occupied++;
-                        curr_occupied_total++;
-                    }
+                bool curr_free = (curr_val < free_threshold_);
+                bool curr_occupied = (curr_val >= occupied_threshold_);
 
-                    if ((gt_free && curr_free) || (gt_occupied && curr_occupied)) {
-                        matched++;
-                        if (gt_free) gt_free_matched++;
-                        if (gt_occupied) gt_occupied_matched++;
-                    }
+                // Değerler eşleşiyor mu?
+                if ((gt_free && curr_free) || (gt_occupied && curr_occupied)) {
+                    matched++;
                 } else {
-                    current_unknown++;
+                    mismatched++;
                 }
             }
         }
 
-        msg.gt_known_cells = gt_known_cells_;
-        msg.current_known_cells = current_known;
-        msg.matched_cells = matched;
-        msg.occupancy_grid_percentage = (gt_known_cells_ > 0) ?
+        // Keşif yüzdesi = doğru eşleşen / GT toplam known
+        // Yanlış yüzdesi = yanlış eşleşen / GT toplam known
+        msg.exploration_2d_percentage = (gt_known_cells_ > 0) ?
             (static_cast<double>(matched) / gt_known_cells_) * 100.0 : 0.0;
 
-        int total_cells = current_known + current_unknown;
-        if (total_cells > 0) {
-            msg.free_space_ratio = static_cast<double>(current_free) / total_cells;
-            msg.occupied_space_ratio = static_cast<double>(current_occupied) / total_cells;
-            msg.unknown_space_ratio = static_cast<double>(current_unknown) / total_cells;
-        }
+        double error_percentage = (gt_known_cells_ > 0) ?
+            (static_cast<double>(mismatched) / gt_known_cells_) * 100.0 : 0.0;
 
-        int free_intersection = gt_free_matched;
-        int free_union = gt_free_total + curr_free_total - free_intersection;
-        msg.iou_free = (free_union > 0) ?
-            static_cast<double>(free_intersection) / free_union : 0.0;
-
-        int occupied_intersection = gt_occupied_matched;
-        int occupied_union = gt_occupied_total + curr_occupied_total - occupied_intersection;
-        msg.iou_occupied = (occupied_union > 0) ?
-            static_cast<double>(occupied_intersection) / occupied_union : 0.0;
+        // Debug log
+        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 10000,
+            "2D: Keşif=%.1f%% (%d/%d) | Yanlış=%.1f%% (%d/%d)",
+            msg.exploration_2d_percentage, matched, gt_known_cells_,
+            error_percentage, mismatched, gt_known_cells_);
     }
 
     void calculateOctomapMetrics(exploration_metrics::msg::ExplorationMetrics& msg)
     {
         if (!current_octomap_ || !gt_octomap_ || gt_known_voxels_ == 0) return;
 
-        int matched = 0;
-        int current_known = 0;
+        int matched = 0;      // GT ile aynı konumda VE aynı değerde
+        int mismatched = 0;   // GT ile aynı konumda AMA farklı değerde
 
         for (auto it = gt_octomap_->begin_leafs(); it != gt_octomap_->end_leafs(); ++it) {
             octomap::point3d coord = it.getCoordinate();
 
             octomap::OcTreeNode* curr_node = current_octomap_->search(coord);
             if (curr_node) {
-                current_known++;
-
                 bool gt_occupied = gt_octomap_->isNodeOccupied(*it);
                 bool curr_occupied = current_octomap_->isNodeOccupied(curr_node);
 
                 if (gt_occupied == curr_occupied) {
                     matched++;
+                } else {
+                    mismatched++;
                 }
             }
+            // curr_node yoksa henüz keşfedilmemiş, atla
         }
 
-        msg.gt_known_voxels = gt_known_voxels_;
-        msg.current_known_voxels = current_known;
-        msg.matched_voxels = matched;
-        msg.octomap_percentage = (gt_known_voxels_ > 0) ?
+        // Keşif yüzdesi = doğru eşleşen / GT toplam known
+        // Yanlış yüzdesi = yanlış eşleşen / GT toplam known
+        msg.exploration_3d_percentage = (gt_known_voxels_ > 0) ?
             (static_cast<double>(matched) / gt_known_voxels_) * 100.0 : 0.0;
+
+        double error_percentage = (gt_known_voxels_ > 0) ?
+            (static_cast<double>(mismatched) / gt_known_voxels_) * 100.0 : 0.0;
+
+        // Debug log
+        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 10000,
+            "3D: Keşif=%.1f%% (%d/%d) | Yanlış=%.1f%% (%d/%d)",
+            msg.exploration_3d_percentage, matched, gt_known_voxels_,
+            error_percentage, mismatched, gt_known_voxels_);
     }
 
     void publishVisualizationMarkers(const exploration_metrics::msg::ExplorationMetrics& msg)
@@ -789,10 +744,10 @@ private:
 
         char text_buf[512];
         snprintf(text_buf, sizeof(text_buf),
-                 "[%s] %.1f%%\nRate: %.2f%%/s\nPath: %.1fm\nVel: %.2fm/s",
+                 "[%s]\n2D: %.1f%% | 3D: %.1f%%\nPath: %.1fm | Vel: %.2fm/s",
                  map_name_.c_str(),
-                 msg.exploration_percentage,
-                 msg.avg_exploration_rate,
+                 msg.exploration_2d_percentage,
+                 msg.exploration_3d_percentage,
                  telemetry_received_ ? latest_telemetry_.total_path_traveled : 0.0,
                  telemetry_received_ ? latest_telemetry_.velocity_horizontal : 0.0);
         text_marker.text = text_buf;
@@ -943,14 +898,9 @@ private:
 
     // Cached values for CSV logging
     double last_exploration_pct_ = 0.0;
-    double last_og_pct_ = 0.0;
-    double last_octomap_pct_ = 0.0;
+    double last_2d_pct_ = 0.0;
+    double last_3d_pct_ = 0.0;
     double last_exploration_rate_ = 0.0;
-    int last_current_known_cells_ = 0;
-    int last_matched_cells_ = 0;
-    double last_free_ratio_ = 0.0;
-    double last_occupied_ratio_ = 0.0;
-    double last_unknown_ratio_ = 0.0;
 
     // ROS interfaces
     rclcpp::Publisher<exploration_metrics::msg::ExplorationMetrics>::SharedPtr metrics_pub_;

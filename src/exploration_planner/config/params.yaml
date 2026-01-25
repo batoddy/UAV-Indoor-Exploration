@@ -20,7 +20,7 @@
     v_max: 2.5               # [m/s] Maximum linear velocity (kamera stabilitesi için)
     yaw_rate_max: 1.5        # [rad/s] Maximum yaw rate (overshoot azaltmak için düşürüldü)
 
-    a_max: 0.6                   # [m/s²] Max linear acceleration (kamera pitch için dengeli)
+    a_max: 0.6                  # [m/s²] Max linear acceleration (kamera pitch için dengeli)
     yaw_accel_max: 1.0          # [rad/s²] Max yaw acceleration (smooth dönüş için)
 
 
@@ -99,7 +99,7 @@
     w_distance: 1.2               # Distance penalty [0.0 - 2.0]
     w_size: 0.1                   # Small cluster penalty
     w_angle: 0.2                 # Direction change penalty
-    w_coverage: 0.3               # Low coverage penalty
+    w_coverage: 0.4               # Low coverage penalty
     max_viewpoints_to_evaluate: 5 # Evaluate top N viewpoints per cluster (not just best)
     
     # ==========================================================================
