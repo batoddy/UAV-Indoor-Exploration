@@ -7,17 +7,21 @@ Usage:
 """
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.conditions import IfCondition
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 from ament_index_python.packages import get_package_share_directory
 import os
 
 
 def generate_launch_description():
     pkg_dir = get_package_share_directory('exploration_planner')
+    frontier_pkg_dir = get_package_share_directory('frontier_exploration')
     params_file = os.path.join(pkg_dir, 'config', 'params.yaml')
+    frontier_params_file = os.path.join(frontier_pkg_dir, 'config', 'params.yaml')
     nav2_params_file = os.path.join(pkg_dir, 'config', 'nav2_params.yaml')
     rviz_config = os.path.join(pkg_dir, 'config', 'exploration.rviz')
 
@@ -29,31 +33,23 @@ def generate_launch_description():
         DeclareLaunchArgument('rviz', default_value='false', description='Launch RViz'),
 
         # ============================================================
-        # NAV2 PLANNER SERVER (includes global costmap)
+        # NAV2 BRINGUP (handles all lifecycle management)
         # ============================================================
-        Node(
-            package='nav2_planner',
-            executable='planner_server',
-            name='planner_server',
-            parameters=[nav2_params_file, {'use_sim_time': use_sim_time}],
-            output='screen'
-        ),
-
-        # Nav2 Lifecycle Manager
-        Node(
-            package='nav2_lifecycle_manager',
-            executable='lifecycle_manager',
-            name='lifecycle_manager_planner',
-            parameters=[{
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('nav2_bringup'), 'launch', 'navigation_launch.py'
+                ])
+            ]),
+            launch_arguments={
                 'use_sim_time': use_sim_time,
-                'autostart': True,
-                'node_names': ['planner_server']
-            }],
-            output='screen'
+                'params_file': nav2_params_file,
+                'autostart': 'true',
+            }.items()
         ),
 
         # ============================================================
-        # EXPLORATION NODES
+        # EXPLORATION PLANNER NODES
         # ============================================================
 
         # Greedy Frontier Selector
@@ -106,10 +102,11 @@ def generate_launch_description():
             package='exploration_planner',
             executable='exploration_visualizer_node',
             name='exploration_visualizer',
-            parameters=[{'use_sim_time': use_sim_time}],
+            parameters=[params_file, {'use_sim_time': use_sim_time}],
             output='screen'
         ),
 
+        # Telemetry
         Node(
             package='exploration_planner',
             executable='telemetry_node',
@@ -119,10 +116,8 @@ def generate_launch_description():
         ),
 
         # ============================================================
-        # OPTIONAL
+        # RVIZ (optional)
         # ============================================================
-
-        # RViz
         Node(
             package='rviz2',
             executable='rviz2',
@@ -130,6 +125,7 @@ def generate_launch_description():
             arguments=['-d', rviz_config],
             parameters=[{'use_sim_time': use_sim_time}],
             condition=IfCondition(rviz),
-            output='screen'
+            output='screen',
+            # env={'LIBGL_ALWAYS_SOFTWARE': '1'}
         ),
     ])

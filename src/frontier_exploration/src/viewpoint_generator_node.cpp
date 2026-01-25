@@ -90,12 +90,17 @@ public:
         declare_parameter("yaw_samples", 36);               // yaw optimization samples
 
         // NEW: Viewpoint quality filters
-        declare_parameter("require_los_to_centroid", true);     // Reject VP if wall blocks view to centroid
+        declare_parameter("min_los_frontier_cells", 3);         // Min frontier cells with LOS required (0 to disable)
         declare_parameter("min_coverage_ratio", 0.2);           // Min % of frontier cells visible (0.0-1.0)
 
         // NEW: Normal-direction sampling (only sample viewpoints facing the frontier)
         declare_parameter("use_normal_sampling", true);         // Enable normal-based sampling
         declare_parameter("normal_angle_range", 2.094);         // Sample within ±60° of normal (120° total)
+
+        // Topic parameters
+        declare_parameter("map_topic", "/projected_map");
+        declare_parameter("input_topic", "frontier_clusters");
+        declare_parameter("output_topic", "frontier_clusters_with_viewpoints");
 
         // Read parameters
         sensor_range_ = get_parameter("sensor_range").as_double();
@@ -129,10 +134,15 @@ public:
         yaw_samples_ = get_parameter("yaw_samples").as_int();
 
         // NEW: Read quality filter parameters
-        require_los_to_centroid_ = get_parameter("require_los_to_centroid").as_bool();
+        min_los_frontier_cells_ = get_parameter("min_los_frontier_cells").as_int();
         min_coverage_ratio_ = get_parameter("min_coverage_ratio").as_double();
         use_normal_sampling_ = get_parameter("use_normal_sampling").as_bool();
         normal_angle_range_ = get_parameter("normal_angle_range").as_double();
+
+        // Read topic parameters
+        map_topic_ = get_parameter("map_topic").as_string();
+        input_topic_ = get_parameter("input_topic").as_string();
+        output_topic_ = get_parameter("output_topic").as_string();
 
         // Clearance radius (2D)
         clearance_radius_ =
@@ -140,11 +150,11 @@ public:
 
         // Subscribers
         clusters_sub_ = create_subscription<frontier_exploration::msg::FrontierArray>(
-            "frontier_clusters", 10,
+            input_topic_, 10,
             std::bind(&ViewpointGeneratorNode::clustersCallback, this, std::placeholders::_1));
 
         map_sub_ = create_subscription<nav_msgs::msg::OccupancyGrid>(
-            "/map", 10,
+            map_topic_, 10,
             std::bind(&ViewpointGeneratorNode::mapCallback, this, std::placeholders::_1));
 
         octomap_sub_ = create_subscription<octomap_msgs::msg::Octomap>(
@@ -153,14 +163,16 @@ public:
 
         // Publisher
         clusters_pub_ = create_publisher<frontier_exploration::msg::FrontierArray>(
-            "frontier_clusters_with_viewpoints", 10);
+            output_topic_, 10);
 
         RCLCPP_INFO(get_logger(), "Viewpoint Generator initialized");
-        RCLCPP_INFO(get_logger(), "  Output: frontier_clusters_with_viewpoints");
+        RCLCPP_INFO(get_logger(), "  Input map: %s", map_topic_.c_str());
+        RCLCPP_INFO(get_logger(), "  Input clusters: %s", input_topic_.c_str());
+        RCLCPP_INFO(get_logger(), "  Output: %s", output_topic_.c_str());
         RCLCPP_INFO(get_logger(), "  Clearance radius: %.2f m (safety=%.2f)", clearance_radius_, safety_margin_);
         RCLCPP_INFO(get_logger(), "  Stabilization: %s", vp_stabilization_enabled_ ? "ENABLED" : "DISABLED");
         RCLCPP_INFO(get_logger(), "  Occlusion-aware coverage: %s", occlusion_enabled_ ? "ENABLED" : "DISABLED");
-        RCLCPP_INFO(get_logger(), "  LOS to centroid check: %s", require_los_to_centroid_ ? "ENABLED" : "DISABLED");
+        RCLCPP_INFO(get_logger(), "  Min LOS frontier cells: %d", min_los_frontier_cells_);
         RCLCPP_INFO(get_logger(), "  Min coverage ratio: %.1f%%", min_coverage_ratio_ * 100.0);
         RCLCPP_INFO(get_logger(), "  Normal-direction sampling: %s (range=%.0f°)",
                     use_normal_sampling_ ? "ENABLED" : "DISABLED",
@@ -419,11 +431,12 @@ private:
                     continue;
                 }
 
-                // 3) NEW: LOS to centroid check
-                // Reject viewpoints that can't see the centroid (wall in between)
-                if (require_los_to_centroid_)
+                // 3) NEW: LOS to frontier cells check
+                // Reject viewpoints that can't see enough frontier cells
+                if (min_los_frontier_cells_ > 0)
                 {
-                    if (!hasLineOfSight(vp_pos.x, vp_pos.y, cluster.centroid.x, cluster.centroid.y, map))
+                    int los_count = countFrontierCellsWithLOS(vp_pos, cluster, map);
+                    if (los_count < min_los_frontier_cells_)
                     {
                         continue;
                     }
@@ -847,6 +860,35 @@ private:
         return count;
     }
 
+    // Count frontier cells with clear LOS from viewpoint (early exit when threshold met)
+    int countFrontierCellsWithLOS(const geometry_msgs::msg::Point &vp_pos,
+                                   const frontier_exploration::msg::FrontierCluster &cluster,
+                                   const nav_msgs::msg::OccupancyGrid &map)
+    {
+        const double range2 = sensor_range_ * sensor_range_;
+        int count = 0;
+
+        for (const auto &cell : cluster.cells)
+        {
+            const double dx = cell.x - vp_pos.x;
+            const double dy = cell.y - vp_pos.y;
+            const double d2 = dx * dx + dy * dy;
+
+            // Skip cells outside sensor range
+            if (d2 > range2)
+                continue;
+
+            if (hasLineOfSight(vp_pos.x, vp_pos.y, cell.x, cell.y, map))
+            {
+                count++;
+                // Early exit: if we have enough, no need to check more
+                if (count >= min_los_frontier_cells_)
+                    return count;
+            }
+        }
+        return count;
+    }
+
     // Bresenham LOS on occupancy grid
     bool hasLineOfSight(double x1, double y1, double x2, double y2,
                         const nav_msgs::msg::OccupancyGrid &map)
@@ -924,10 +966,15 @@ private:
     int yaw_samples_{36};
 
     // NEW: Viewpoint quality filters
-    bool require_los_to_centroid_{true};
+    int min_los_frontier_cells_{3};
     double min_coverage_ratio_{0.2};
     bool use_normal_sampling_{true};
     double normal_angle_range_{2.094};  // ~120 degrees
+
+    // Topic names
+    std::string map_topic_;
+    std::string input_topic_;
+    std::string output_topic_;
 
     // Maps
     nav_msgs::msg::OccupancyGrid::SharedPtr current_map_;

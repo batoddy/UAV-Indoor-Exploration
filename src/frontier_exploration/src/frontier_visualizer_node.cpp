@@ -24,19 +24,28 @@ class FrontierVisualizerNode : public rclcpp::Node
 public:
   FrontierVisualizerNode() : Node("frontier_visualizer")
   {
+    // Parameters
+    declare_parameter("input_topic", "frontier_clusters_with_viewpoints");
+    declare_parameter("marker_topic", "frontier_markers");
+    declare_parameter("info_topic", "fis_info");
+
+    input_topic_ = get_parameter("input_topic").as_string();
+    marker_topic_ = get_parameter("marker_topic").as_string();
+    info_topic_ = get_parameter("info_topic").as_string();
+
     // Subscriber
     clusters_sub_ = create_subscription<frontier_exploration::msg::FrontierArray>(
-      "frontier_clusters_complete", 10,
+      input_topic_, 10,
       std::bind(&FrontierVisualizerNode::clustersCallback, this, std::placeholders::_1));
-    
+
     // Publishers
     marker_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>(
-      "frontier_markers", 10);
-    info_pub_ = create_publisher<std_msgs::msg::String>("fis_info", 10);
-    
+      marker_topic_, 10);
+    info_pub_ = create_publisher<std_msgs::msg::String>(info_topic_, 10);
+
     RCLCPP_INFO(get_logger(), "Frontier Visualizer initialized");
-    RCLCPP_INFO(get_logger(), "  Input:  frontier_clusters_complete");
-    RCLCPP_INFO(get_logger(), "  Output: frontier_markers, fis_info");
+    RCLCPP_INFO(get_logger(), "  Input:  %s", input_topic_.c_str());
+    RCLCPP_INFO(get_logger(), "  Output: %s, %s", marker_topic_.c_str(), info_topic_.c_str());
   }
 
 private:
@@ -293,6 +302,12 @@ private:
     info_pub_->publish(info);
   }
   
+  // Topic names
+  std::string input_topic_;
+  std::string marker_topic_;
+  std::string info_topic_;
+
+  // ROS
   rclcpp::Subscription<frontier_exploration::msg::FrontierArray>::SharedPtr clusters_sub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr info_pub_;

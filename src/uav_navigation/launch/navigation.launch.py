@@ -69,8 +69,8 @@ Node(
         'pointcloud_max_z': 10.0,
         
         # ⭐ 2D HARİTAYA PROJEKSİYON
-        'occupancy_min_z': 0.8,               # ⭐ 50cm altı engel sayılmaz
-        'occupancy_max_z': 2.0,              # ⭐ 1.5m üstü engel sayılmaz
+        'occupancy_min_z': 1.0,               # ⭐ 50cm altı engel sayılmaz
+        'occupancy_max_z': 1.8,              # ⭐ 1.5m üstü engel sayılmaz
         
         # ============ ZEMİN FİLTRELEME ============
         'filter_ground': True,
@@ -92,7 +92,7 @@ Node(
     }],
     remappings=[
         ('cloud_in', '/camera/points'),
-        ('projected_map', '/map'),
+        ('projected_map', '/projected_map'),
         ('octomap_binary', '/octomap_binary'),
         ('octomap_full', '/octomap_full'),
         ('octomap_point_cloud_centers', '/octomap_points'),

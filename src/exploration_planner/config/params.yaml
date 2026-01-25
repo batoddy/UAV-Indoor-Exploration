@@ -17,11 +17,11 @@
     # yaw_accel_max: 1.5           # [rad/s²] Max yaw acceleration (was 1.0)
     
     # ==========================================================================
-    v_max: 2.0               # [m/s] Maximum linear velocity
-    yaw_rate_max: 2.0        # [rad/s] Maximum yaw rate
+    v_max: 2.5               # [m/s] Maximum linear velocity (kamera stabilitesi için)
+    yaw_rate_max: 1.5        # [rad/s] Maximum yaw rate (overshoot azaltmak için düşürüldü)
 
-    a_max: 0.3                   # [m/s²] Max linear acceleration (was 0.7, now faster)
-    yaw_accel_max: 0.7          # [rad/s²] Max yaw acceleration (was 1.0)
+    a_max: 0.6                   # [m/s²] Max linear acceleration (kamera pitch için dengeli)
+    yaw_accel_max: 1.0          # [rad/s²] Max yaw acceleration (smooth dönüş için)
 
 
     # ==========================================================================
@@ -42,7 +42,7 @@
     max_height: 1.8               # [m] Above this = ignore (too high)
     costmap_resolution: 0.1       # [m] Costmap cell size (smaller = more precise)
     inflation_radius: 1.0         # [m] Total inflation around obstacles
-    costmap_frame: "map"
+    costmap_frame: "projected_map"
     map_size_x: 100.0             # [m] Max map width
     map_size_y: 100.0             # [m] Max map height
     
@@ -88,10 +88,17 @@
     # ==========================================================================
     # cost = w_distance * dist + w_size * (1/size) + w_angle * angle + w_coverage * (1/cov)
     # Lower cost = better frontier
-    
+
+    # Topic parameters
+    input_topic: "frontier_clusters_with_viewpoints"
+    odom_topic: "/odom"
+    output_topic: "/exploration/global_tour"
+    costmap_topic: "/global_costmap/costmap"
+
+    # Cost weights
     w_distance: 1.2               # Distance penalty [0.0 - 2.0]
     w_size: 0.1                   # Small cluster penalty
-    w_angle: 0.55                 # Direction change penalty
+    w_angle: 0.2                 # Direction change penalty
     w_coverage: 0.3               # Low coverage penalty
     max_viewpoints_to_evaluate: 5 # Evaluate top N viewpoints per cluster (not just best)
     
@@ -125,13 +132,15 @@
     goal_tolerance_xy: 0.25       # [m] Position tolerance (tighter: 25cm)
     goal_tolerance_yaw: 0.15      # [rad] Yaw tolerance (~8.5 deg)
 
-    # Gains - INCREASED for faster response
-    kp_linear: 1.8                # Position proportional gain (was 0.8, now faster)
-    kp_yaw: 1.5                   # Yaw proportional gain
+    # PD Gains - Proportional + Derivative for smooth control
+    kp_linear: 1.5                # Position proportional gain (biraz artırıldı)
+    kd_linear: 0.6                # Position derivative gain (reduces overshoot)
+    kp_yaw: 0.8                   # Yaw proportional gain (overshoot için düşürüldü)
+    kd_yaw: 0.6                   # Yaw derivative gain (damping artırıldı - kritik!)
 
     # Smoothing parameters
-    velocity_smoothing: 0.2       # Exponential smoothing (0-1, lower = more responsive)
-    slowdown_distance: 1.0        # [m] Start slowing closer to goal (was 2.0)
+    velocity_smoothing: 0.2       # Exponential smoothing (biraz daha reaktif)
+    slowdown_distance: 1.0        # [m] Start slowing before goal
     min_approach_speed: 0.4       # [m/s] Minimum speed when approaching
     
     # Progressive Yaw - Trajectory follower'da ek yaw smoothing

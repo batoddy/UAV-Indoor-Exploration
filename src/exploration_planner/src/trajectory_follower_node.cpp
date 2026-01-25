@@ -28,7 +28,9 @@ public:
     declare_parameter("waypoint_tolerance", 0.5);
 
     declare_parameter("kp_linear", 1.0);
+    declare_parameter("kd_linear", 0.3);
     declare_parameter("kp_yaw", 1.5);
+    declare_parameter("kd_yaw", 0.2);
     declare_parameter("kp_z", 1.0);
 
     declare_parameter("v_max", 2.5);
@@ -73,7 +75,9 @@ private:
     wp_tol_ = get_parameter("waypoint_tolerance").as_double();
 
     kp_lin_ = get_parameter("kp_linear").as_double();
+    kd_lin_ = get_parameter("kd_linear").as_double();
     kp_yaw_ = get_parameter("kp_yaw").as_double();
+    kd_yaw_ = get_parameter("kd_yaw").as_double();
     kp_z_ = get_parameter("kp_z").as_double();
 
     v_max_ = get_parameter("v_max").as_double();
@@ -105,6 +109,11 @@ private:
     traj_ = *msg;
     current_wp_ = 0;
     have_traj_ = true;
+
+    // Reset derivative state for new trajectory
+    prev_yaw_err_ = 0.0;
+    prev_dx_ = 0.0;
+    prev_dy_ = 0.0;
 
     RCLCPP_INFO(get_logger(), "New trajectory: %zu waypoints", traj_.poses.size());
   }
@@ -173,24 +182,37 @@ private:
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    // YAW CONTROL: Follow trajectory yaw (allows crab-walking)
+    // YAW CONTROL: PD control for yaw (reduces overshoot)
     // ═══════════════════════════════════════════════════════════════════
     double desired_yaw = target_yaw;
     double yaw_err = normalizeAngle(desired_yaw - yaw_);
 
+    // Derivative term for yaw (rate of change of error)
+    double yaw_err_derivative = (yaw_err - prev_yaw_err_) / dt_;
+    prev_yaw_err_ = yaw_err;
+
+    // PD yaw control
+    double yaw_cmd = kp_yaw_ * yaw_err + kd_yaw_ * yaw_err_derivative;
+
     // ═══════════════════════════════════════════════════════════════════
-    // VELOCITY: Move towards target in WORLD frame, then transform to body
+    // VELOCITY: PD control in WORLD frame, then transform to body
     // ═══════════════════════════════════════════════════════════════════
 
-    // Speed scaling
+    // Speed scaling near goal
     double speed_scale = 1.0;
     if (dist_to_goal < slowdown_dist_) {
       speed_scale = std::max(min_speed_ / v_max_, dist_to_goal / slowdown_dist_);
     }
 
-    // World frame velocity (towards waypoint)
-    double vx_world = kp_lin_ * dx * speed_scale;
-    double vy_world = kp_lin_ * dy * speed_scale;
+    // Derivative terms for position (rate of change of error)
+    double dx_derivative = (dx - prev_dx_) / dt_;
+    double dy_derivative = (dy - prev_dy_) / dt_;
+    prev_dx_ = dx;
+    prev_dy_ = dy;
+
+    // PD control for world frame velocity
+    double vx_world = (kp_lin_ * dx + kd_lin_ * dx_derivative) * speed_scale;
+    double vy_world = (kp_lin_ * dy + kd_lin_ * dy_derivative) * speed_scale;
 
     // Clamp world velocity
     double v_world = std::sqrt(vx_world*vx_world + vy_world*vy_world);
@@ -210,7 +232,7 @@ private:
     cmd.linear.x = rateLimit(vx_body, last_cmd_.linear.x, a_max_);
     cmd.linear.y = rateLimit(vy_body, last_cmd_.linear.y, a_max_);
     cmd.linear.z = rateLimit(vz, last_cmd_.linear.z, a_max_);
-    cmd.angular.z = rateLimit(kp_yaw_ * yaw_err, last_cmd_.angular.z, yaw_accel_max_);
+    cmd.angular.z = rateLimit(yaw_cmd, last_cmd_.angular.z, yaw_accel_max_);
     cmd.angular.z = clamp(cmd.angular.z, -yaw_rate_max_, yaw_rate_max_);
 
     // Smoothing
@@ -291,7 +313,7 @@ private:
 
   // Parameters
   double dt_, goal_tol_xy_, goal_tol_yaw_, wp_tol_;
-  double kp_lin_, kp_yaw_, kp_z_;
+  double kp_lin_, kd_lin_, kp_yaw_, kd_yaw_, kp_z_;
   double v_max_, yaw_rate_max_, vz_max_;
   double a_max_, yaw_accel_max_, smoothing_;
   double slowdown_dist_, min_speed_;
@@ -306,6 +328,11 @@ private:
   exploration_planner::msg::Trajectory traj_;
   size_t current_wp_ = 0;
   geometry_msgs::msg::Twist last_cmd_;
+
+  // PD control - previous errors for derivative
+  double prev_yaw_err_ = 0.0;
+  double prev_dx_ = 0.0;
+  double prev_dy_ = 0.0;
 
   // ROS
   rclcpp::Subscription<exploration_planner::msg::Trajectory>::SharedPtr traj_sub_;

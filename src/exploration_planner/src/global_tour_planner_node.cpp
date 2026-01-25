@@ -43,22 +43,34 @@ class GreedyFrontierSelectorNode : public rclcpp::Node
 public:
   GreedyFrontierSelectorNode() : Node("greedy_frontier_selector")
   {
+    // Topic parameters
+    declare_parameter("input_topic", "frontier_clusters_with_viewpoints");
+    declare_parameter("odom_topic", "/odom");
+    declare_parameter("output_topic", "/exploration/global_tour");
+    declare_parameter("costmap_topic", "/global_costmap/costmap");
+
     // Cost function weights
     declare_parameter("w_distance", 1.0);
     declare_parameter("w_size", 0.3);
     declare_parameter("w_angle", 0.5);
     declare_parameter("w_coverage", 0.6);
-    
+
     // Viewpoint selection
     declare_parameter("max_viewpoints_to_evaluate", 5);  // Evaluate top N viewpoints per cluster
-    
+
     // Motion limits
     declare_parameter("v_max", 4.0);
     declare_parameter("yaw_rate_max", 2.5);
-    
+
     // Nav2 integration
     declare_parameter("nav2_enable", false);
-    
+
+    // Read topic parameters
+    input_topic_ = get_parameter("input_topic").as_string();
+    odom_topic_ = get_parameter("odom_topic").as_string();
+    output_topic_ = get_parameter("output_topic").as_string();
+    costmap_topic_ = get_parameter("costmap_topic").as_string();
+
     w_distance_ = get_parameter("w_distance").as_double();
     w_size_ = get_parameter("w_size").as_double();
     w_angle_ = get_parameter("w_angle").as_double();
@@ -67,44 +79,46 @@ public:
     v_max_ = get_parameter("v_max").as_double();
     yaw_rate_max_ = get_parameter("yaw_rate_max").as_double();
     nav2_enable_ = get_parameter("nav2_enable").as_bool();
-    
+
     // Subscribers
-    // ✅ Now subscribing to frontier_clusters_with_viewpoints (from Viewpoint Generator)
-    // This topic includes feature-rich viewpoints with cluster context already embedded!
     clusters_sub_ = create_subscription<frontier_exploration::msg::FrontierArray>(
-      "frontier_clusters_with_viewpoints", 10,
+      input_topic_, 10,
       std::bind(&GreedyFrontierSelectorNode::clustersCallback, this, std::placeholders::_1));
-    
+
     odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
-      "/odom", 10,
+      odom_topic_, 10,
       std::bind(&GreedyFrontierSelectorNode::odomCallback, this, std::placeholders::_1));
-    
+
     pose_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>(
       "/mavros/local_position/pose", 10,
       std::bind(&GreedyFrontierSelectorNode::poseCallback, this, std::placeholders::_1));
-    
+
     // Publisher
     tour_pub_ = create_publisher<exploration_planner::msg::ExplorationStatus>(
-      "/exploration/global_tour", 10);
-    
+      output_topic_, 10);
+
     // Nav2 goal publisher (if enabled)
     goal_pose_pub_ = create_publisher<geometry_msgs::msg::PoseStamped>(
       "/goal_pose", 10);
-    
+
     // Services
     start_srv_ = create_service<std_srvs::srv::Trigger>(
       "/exploration/start",
-      std::bind(&GreedyFrontierSelectorNode::startCallback, this, 
+      std::bind(&GreedyFrontierSelectorNode::startCallback, this,
                 std::placeholders::_1, std::placeholders::_2));
-    
+
     stop_srv_ = create_service<std_srvs::srv::Trigger>(
       "/exploration/stop",
       std::bind(&GreedyFrontierSelectorNode::stopCallback, this,
                 std::placeholders::_1, std::placeholders::_2));
 
+    // Service clients for exploration metrics
+    metrics_start_client_ = create_client<std_srvs::srv::Trigger>("/exploration_metrics/start_timer");
+    metrics_stop_client_ = create_client<std_srvs::srv::Trigger>("/exploration_metrics/stop_timer");
+
     costmap_sub_ =
         this->create_subscription<nav_msgs::msg::OccupancyGrid>(
-          "/global_costmap/costmap",
+          costmap_topic_,
           rclcpp::QoS(1).transient_local(),
           [this](const nav_msgs::msg::OccupancyGrid::SharedPtr msg)
           {
@@ -113,6 +127,8 @@ public:
 
     
     RCLCPP_INFO(get_logger(), "Greedy Frontier Selector initialized");
+    RCLCPP_INFO(get_logger(), "  Input: %s", input_topic_.c_str());
+    RCLCPP_INFO(get_logger(), "  Output: %s", output_topic_.c_str());
     RCLCPP_INFO(get_logger(), "  Cost weights: dist=%.2f, size=%.2f, angle=%.2f, coverage=%.2f",
                 w_distance_, w_size_, w_angle_, w_coverage_);
     RCLCPP_INFO(get_logger(), "  Max viewpoints to evaluate: %d", max_viewpoints_to_evaluate_);
@@ -126,21 +142,37 @@ private:
     response->success = true;
     response->message = "Exploration started";
     RCLCPP_INFO(get_logger(), "Exploration STARTED");
+
+    // Start metrics timer (async, non-blocking)
+    if (metrics_start_client_->service_is_ready()) {
+      auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+      metrics_start_client_->async_send_request(request);
+      RCLCPP_INFO(get_logger(), "Metrics timer started");
+    } else {
+      RCLCPP_WARN(get_logger(), "Metrics timer service not available");
+    }
   }
   
   void stopCallback(const std_srvs::srv::Trigger::Request::SharedPtr,
                     std_srvs::srv::Trigger::Response::SharedPtr response)
   {
     exploration_active_ = false;
-    
+
     exploration_planner::msg::ExplorationStatus status;
     status.header.stamp = now();
     status.state = exploration_planner::msg::ExplorationStatus::IDLE;
     tour_pub_->publish(status);
-    
+
     response->success = true;
     response->message = "Exploration stopped";
     RCLCPP_INFO(get_logger(), "Exploration STOPPED");
+
+    // Stop metrics timer (async, non-blocking)
+    if (metrics_stop_client_->service_is_ready()) {
+      auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+      metrics_stop_client_->async_send_request(request);
+      RCLCPP_INFO(get_logger(), "Metrics timer stopped");
+    }
   }
   
   void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
@@ -360,6 +392,12 @@ private:
     return {best_cluster, best_vp_idx, best_cost};
   }
   
+  // Topic names
+  std::string input_topic_;
+  std::string odom_topic_;
+  std::string output_topic_;
+  std::string costmap_topic_;
+
   // Parameters
   double w_distance_;
   double w_size_;
@@ -388,6 +426,8 @@ private:
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr goal_pose_pub_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_srv_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_srv_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr metrics_start_client_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr metrics_stop_client_;
 };
 
 int main(int argc, char** argv)

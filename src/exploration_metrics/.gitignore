@@ -1,0 +1,7 @@
+# Ground truth maps (user-specific)
+ground_truth/*.bt
+ground_truth/*.pgm
+ground_truth/*.yaml
+
+# Keep the directory
+!ground_truth/.gitkeep

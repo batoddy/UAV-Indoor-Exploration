@@ -32,7 +32,7 @@ public:
   FrontierDetectorNode() : Node("frontier_detector")
   {
     // Parameters
-    declare_parameter("map_topic", "/map");
+    declare_parameter("map_topic", "/projected_map");
     declare_parameter("min_frontier_size", 5);
     declare_parameter("max_cluster_size", 50);
     declare_parameter("free_threshold", 25);
@@ -196,8 +196,13 @@ private:
 
     for (const auto& [dx, dy] : NEIGHBORS_8) {
       const int nx = x + dx, ny = y + dy;
-      if (!inBounds(nx, ny, w, h))
+      if (!inBounds(nx, ny, w, h)) {
+        // Harita dışı = UNKNOWN
+        if (std::abs(dx) + std::abs(dy) == 1) {
+          touches_unknown = true;
+        }
         continue;
+      }
 
       const int nidx = getIndex(nx, ny, w);
       const int8_t nv = map.data[nidx];
@@ -238,12 +243,12 @@ private:
     std::vector<bool> mask(w * h, false);
 
     // Avoid borders (safe neighbor checks)
-    for (int y = 1; y < h - 1; ++y) {
-      for (int x = 1; x < w - 1; ++x) {
+    for (int y = 0; y < h; ++y) {
+      for (int x = 0; x < w; ++x) {
         const int idx = getIndex(x, y, w);
         mask[idx] = isFrontierCell(x, y, map);
       }
-    }
+}
     return mask;
   }
 

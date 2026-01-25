@@ -1,9 +1,14 @@
 # Frontier Exploration Parameters
+# Tum node'lar bu dosyadan parametre alir
 
 # ============ Node 1: Frontier Detector ============
 frontier_detector:
   ros__parameters:
-    map_topic: "/map"
+    # Topic parameters
+    map_topic: "/projected_map"
+    output_topic: "frontier_clusters"
+
+    # Clustering parameters
     min_frontier_size: 5       # Min cells for valid cluster
     max_cluster_size: 27       # Max cells before PCA split
     free_threshold: 25         # Occupancy < this = free
@@ -14,14 +19,19 @@ frontier_detector:
 # ============ Node 2: Viewpoint Generator ============
 viewpoint_generator:
   ros__parameters:
+    # Topic parameters
+    map_topic: "/projected_map"
+    input_topic: "frontier_clusters"
+    output_topic: "frontier_clusters_with_viewpoints"
+
     # Sensor model
-    sensor_range: 3.0          # Max sensing range (m)
+    sensor_range: 7.0          # Max sensing range (m)
     sensor_fov_h: 1.57         # Horizontal FOV (~90°)
 
     # Cylindrical sampling
-    min_dist: 1.5              # Min distance from cluster (safety buffer)
+    min_dist: 0.5              # Min distance from cluster (safety buffer)
     max_dist: 3.0              # Max distance from cluster
-    num_dist_samples: 3        # Radial samples
+    num_dist_samples: 5        # Radial samples
     num_angle_samples: 16      # Angular samples (every 22.5°) - increased for normal sampling
 
     # Filtering
@@ -52,23 +62,17 @@ viewpoint_generator:
     occlusion_angle_bin_rad: 0.02  # Angular bin size for ray binning (~1.15°)
     yaw_samples: 36                # Yaw optimization samples
 
-    # ============ NEW: Viewpoint Quality Filters ============
+    # Viewpoint Quality Filters
     # These prevent viewpoints from being placed behind obstacles
-
-    # LOS to centroid: Reject viewpoints that can't see the cluster centroid
-    require_los_to_centroid: true
-
-    # Percentage-based coverage: VP must see at least this % of frontier cells
-    # Combined with min_coverage: actual_min = max(min_coverage, cluster_size * ratio)
+    require_los_to_centroid: true  # Reject VP if wall blocks view to centroid
     min_coverage_ratio: 0.2        # 20% of frontier cells must be visible
+    use_normal_sampling: false      # Only sample viewpoints on the "free space" side // bunu dene
+    normal_angle_range: 2.094      # Sample within +/-60 of normal (120 total, ~2.094 rad)
 
-    # Normal-direction sampling: Only sample viewpoints on the "free space" side
-    # This uses PCA to find the frontier orientation and samples towards explored area
-    use_normal_sampling: true
-    normal_angle_range: 2.094      # Sample within ±60° of normal (120° total, ~2.094 rad)
-
-# ============ Node 3: Cost Computer ============
-cost_computer:
+# ============ Node 3: Frontier Visualizer ============
+frontier_visualizer:
   ros__parameters:
-    v_max: 2.5                 # Max velocity (m/s)
-    yaw_rate_max: 1.5          # Max yaw rate (rad/s)
+    # Topic parameters
+    input_topic: "frontier_clusters_with_viewpoints"
+    marker_topic: "frontier_markers"
+    info_topic: "fis_info"

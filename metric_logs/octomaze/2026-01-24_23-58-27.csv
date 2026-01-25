@@ -1,0 +1,3 @@
+timestamp,elapsed_time,velocity_instant,velocity_average,acceleration,yaw_rad,yaw_deg,path_traveled,exploration_pct,og_pct,octomap_pct,exploration_rate,avg_exploration_rate,gt_known_cells,current_known_cells,matched_cells,free_ratio,occupied_ratio,unknown_ratio
+0.000000000,0.070,0.474,0.617,0.000,2.676,153.320,2.082,0.000,0.000,0.000,0.000,-1.000,0,0,0,0.000,0.000,0.000
+0.000000000,0.169,0.435,0.601,0.000,2.601,149.024,2.105,0.000,0.000,0.000,0.000,-1.000,0,0,0,0.000,0.000,0.000

@@ -1,0 +1,64 @@
+# Exploration Metrics Configuration
+#
+# Usage:
+#   ros2 launch exploration_metrics exploration_metrics.launch.py map:=octomaze
+#
+# Directory Structure:
+#   ground_truth/
+#     octomaze/
+#       octomaze.yaml   <- Ground truth occupancy grid
+#       octomaze.pgm    <- Ground truth image
+#       octomaze.bt     <- Ground truth octomap (optional)
+#   metric_logs/
+#     octomaze/
+#       2026-01-24_15-30-22.csv  <- Timestamped log files
+
+exploration_metrics_node:
+  ros__parameters:
+    # Comparison mode: "occupancy_grid", "octomap", or "both"
+    comparison_mode: "occupancy_grid"
+
+    # Map name (set via launch argument)
+    map_name: "default"
+
+    # Base path for ground truth and logs
+    base_path: "/home/batoddy/uav_ws"
+
+    # Topic names
+    map_topic: "/projected_map"
+    octomap_topic: "/octomap_binary"
+
+    # Publishing rate for metrics (Hz)
+    publish_rate: 1.0
+
+    # Telemetry logging rate (Hz) - for motion metrics
+    # Higher = more detailed motion data, larger files
+    telemetry_log_rate: 10.0
+
+    # CSV logging settings
+    # Logging auto-starts when /exploration/start is called
+    # Logging auto-stops when /exploration/stop is called
+    logging_enabled: true
+
+    # OccupancyGrid thresholds (0-100 scale)
+    occupied_threshold: 65    # Values >= this are considered occupied
+    free_threshold: 25        # Values < this are considered free
+
+    # Position tolerance for voxel matching (meters)
+    position_tolerance: 0.01
+
+    # EMA alpha for average exploration rate calculation (0-1)
+    # Lower values = smoother averaging, higher values = more responsive
+    ema_alpha: 0.1
+
+map_saver_node:
+  ros__parameters:
+    # Directory to save ground truth maps
+    save_directory: "/home/batoddy/uav_ws/src/exploration_metrics/ground_truth"
+
+    # Topic names
+    map_topic: "/projected_map"
+    octomap_topic: "/octomap_binary"
+
+    # Add timestamp to saved file names
+    auto_timestamp: true

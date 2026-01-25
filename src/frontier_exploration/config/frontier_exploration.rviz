@@ -25,7 +25,7 @@ Visualization Manager:
       Enabled: true
       Name: OccupancyGrid
       Topic:
-        Value: /map
+        Value: /projected_map
         Depth: 5
         Durability Policy: Transient Local
         Reliability Policy: Reliable

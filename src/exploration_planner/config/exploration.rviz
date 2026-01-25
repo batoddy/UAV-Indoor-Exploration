@@ -50,7 +50,7 @@ Visualization Manager:
       Enabled: true
       Name: Nav2 Global Costmap
       Topic:
-        Value: /planner_server/global_costmap/costmap
+        Value: /global_costmap/costmap
         Depth: 5
         Durability Policy: Volatile
         Reliability Policy: Best Effort
@@ -65,7 +65,7 @@ Visualization Manager:
       Enabled: true
       Name: Map
       Topic:
-        Value: /map
+        Value: /projected_map
         Depth: 5
         Durability Policy: Transient Local
         Reliability Policy: Reliable
