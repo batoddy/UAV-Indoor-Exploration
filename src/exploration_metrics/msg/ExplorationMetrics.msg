@@ -31,5 +31,13 @@ float64 avg_exploration_rate       # Average exploration rate (EMA)
 float64 exploration_2d_percentage  # 2D map exploration percentage (0-100)
 float64 exploration_3d_percentage  # 3D map exploration percentage (0-100)
 
+# ============================================================================
+# EXPLORED AREA/VOLUME (absolute units)
+# ============================================================================
+float64 explored_area_m2           # [m²] 2D explored area in square meters
+float64 explored_volume_m3         # [m³] 3D explored volume in cubic meters
+float64 total_area_m2              # [m²] Ground truth total area
+float64 total_volume_m3            # [m³] Ground truth total volume
+
 # Comparison mode indicator
 string comparison_mode             # "occupancy_grid", "octomap", or "both"

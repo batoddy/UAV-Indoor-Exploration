@@ -434,6 +434,8 @@ private:
                       << "exploration_pct,"
                       << "2d_pct,"
                       << "3d_pct,"
+                      << "explored_area_m2,"
+                      << "explored_volume_m3,"
                       << "exploration_rate,"
                       << "avg_exploration_rate"
                       << std::endl;
@@ -479,6 +481,10 @@ private:
                   << last_exploration_pct_ << ","
                   << last_2d_pct_ << ","
                   << last_3d_pct_ << ","
+                  << std::setprecision(2)
+                  << last_explored_area_m2_ << ","
+                  << last_explored_volume_m3_ << ","
+                  << std::setprecision(3)
                   << last_exploration_rate_ << ","
                   << avg_exploration_rate_
                   << std::endl;
@@ -518,11 +524,17 @@ private:
         // Motion metrics from telemetry
         if (telemetry_received_) {
             metrics_msg.velocity_instant = latest_telemetry_.velocity_horizontal;
-            metrics_msg.velocity_average = latest_telemetry_.average_velocity;
             metrics_msg.acceleration = latest_telemetry_.acceleration_magnitude;
             metrics_msg.yaw_rad = latest_telemetry_.current_yaw;
             metrics_msg.yaw_deg = latest_telemetry_.current_yaw * 180.0 / M_PI;
             metrics_msg.path_traveled = latest_telemetry_.total_path_traveled;
+
+            // Average velocity = path_traveled / exploration_duration
+            if (exploration_active_ && metrics_msg.exploration_duration > 0.1) {
+                metrics_msg.velocity_average = latest_telemetry_.total_path_traveled / metrics_msg.exploration_duration;
+            } else {
+                metrics_msg.velocity_average = latest_telemetry_.average_velocity;
+            }
         } else {
             metrics_msg.velocity_instant = 0.0;
             metrics_msg.velocity_average = 0.0;
@@ -533,15 +545,25 @@ private:
         }
 
         // Calculate OccupancyGrid metrics
-        if ((comparison_mode_ == "occupancy_grid" || comparison_mode_ == "both") &&
-            gt_occupancy_grid_loaded_ && map_received_) {
-            calculateOccupancyGridMetrics(metrics_msg);
+        if ((comparison_mode_ == "occupancy_grid" || comparison_mode_ == "both") && map_received_) {
+            // Always calculate current map area from OccupancyGrid
+            calculateCurrentMapArea();
+
+            // Calculate exploration percentage only if ground truth is loaded
+            if (gt_occupancy_grid_loaded_) {
+                calculateOccupancyGridMetrics(metrics_msg);
+            }
         }
 
         // Calculate OctoMap metrics
-        if ((comparison_mode_ == "octomap" || comparison_mode_ == "both") &&
-            gt_octomap_loaded_ && octomap_received_) {
-            calculateOctomapMetrics(metrics_msg);
+        if ((comparison_mode_ == "octomap" || comparison_mode_ == "both") && octomap_received_) {
+            // Always calculate current map volume from OctoMap
+            calculateCurrentMapVolume();
+
+            // Calculate exploration percentage only if ground truth is loaded
+            if (gt_octomap_loaded_) {
+                calculateOctomapMetrics(metrics_msg);
+            }
         }
 
         // Calculate overall exploration percentage
@@ -591,6 +613,12 @@ private:
         last_3d_pct_ = metrics_msg.exploration_3d_percentage;
         last_exploration_rate_ = metrics_msg.exploration_rate;
 
+        // Fill explored area/volume in message
+        metrics_msg.explored_area_m2 = last_explored_area_m2_;
+        metrics_msg.explored_volume_m3 = last_explored_volume_m3_;
+        metrics_msg.total_area_m2 = gt_total_area_m2_;
+        metrics_msg.total_volume_m3 = gt_total_volume_m3_;
+
         last_exploration_percentage_ = metrics_msg.exploration_percentage;
         last_elapsed_time_ = time_for_rate;
 
@@ -602,12 +630,66 @@ private:
         if (exploration_active_ && static_cast<int>(metrics_msg.exploration_duration) % 10 == 0 &&
             metrics_msg.exploration_duration > 0.5) {
             RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 10000,
-                "[%s] 2D: %.1f%% | 3D: %.1f%% | Rate: %.2f%%/s | Path: %.1fm",
+                "[%s] 2D: %.1f%% (%.1f m²) | 3D: %.1f%% (%.2f m³) | Rate: %.2f%%/s | Path: %.1fm",
                 map_name_.c_str(),
                 metrics_msg.exploration_2d_percentage,
+                last_explored_area_m2_,
                 metrics_msg.exploration_3d_percentage,
+                last_explored_volume_m3_,
                 metrics_msg.avg_exploration_rate,
                 telemetry_received_ ? latest_telemetry_.total_path_traveled : 0.0);
+        }
+    }
+
+    /**
+     * @brief Calculate current map area directly from OccupancyGrid (no ground truth needed)
+     *
+     * Counts all known cells (free or occupied) in the current map and calculates
+     * the total explored area in m².
+     */
+    void calculateCurrentMapArea()
+    {
+        if (!current_map_) return;
+
+        int known_cells = 0;
+        for (size_t i = 0; i < current_map_->data.size(); ++i) {
+            // Count cells that are not unknown (-1)
+            if (current_map_->data[i] != -1) {
+                known_cells++;
+            }
+        }
+
+        double cell_area = current_map_->info.resolution * current_map_->info.resolution;
+        last_explored_area_m2_ = known_cells * cell_area;
+
+        // If no ground truth, set total to explored (100% coverage of what we know)
+        if (!gt_occupancy_grid_loaded_) {
+            gt_total_area_m2_ = last_explored_area_m2_;
+        }
+    }
+
+    /**
+     * @brief Calculate current map volume directly from OctoMap (no ground truth needed)
+     *
+     * Counts all leaf voxels in the current OctoMap and calculates
+     * the total explored volume in m³.
+     */
+    void calculateCurrentMapVolume()
+    {
+        if (!current_octomap_) return;
+
+        int known_voxels = 0;
+        for (auto it = current_octomap_->begin_leafs(); it != current_octomap_->end_leafs(); ++it) {
+            known_voxels++;
+        }
+
+        double voxel_res = current_octomap_->getResolution();
+        double voxel_volume = voxel_res * voxel_res * voxel_res;
+        last_explored_volume_m3_ = known_voxels * voxel_volume;
+
+        // If no ground truth, set total to explored (100% coverage of what we know)
+        if (!gt_octomap_loaded_) {
+            gt_total_volume_m3_ = last_explored_volume_m3_;
         }
     }
 
@@ -615,73 +697,58 @@ private:
     {
         if (!current_map_ || gt_known_cells_ == 0) return;
 
-        int matched = 0;      // GT ile aynı konumda VE aynı değerde
-        int mismatched = 0;   // GT ile aynı konumda AMA farklı değerde
+        int discovered = 0;
 
-        double gt_resolution = gt_occupancy_grid_.info.resolution;
-        double gt_origin_x = gt_occupancy_grid_.info.origin.position.x;
-        double gt_origin_y = gt_occupancy_grid_.info.origin.position.y;
-        int gt_width = gt_occupancy_grid_.info.width;
-        int gt_height = gt_occupancy_grid_.info.height;
+        double gt_res = gt_occupancy_grid_.info.resolution;
+        double gt_ox  = gt_occupancy_grid_.info.origin.position.x;
+        double gt_oy  = gt_occupancy_grid_.info.origin.position.y;
 
-        double curr_resolution = current_map_->info.resolution;
-        double curr_origin_x = current_map_->info.origin.position.x;
-        double curr_origin_y = current_map_->info.origin.position.y;
-        int curr_width = current_map_->info.width;
-        int curr_height = current_map_->info.height;
+        double cur_res = current_map_->info.resolution;
+        double cur_ox  = current_map_->info.origin.position.x;
+        double cur_oy  = current_map_->info.origin.position.y;
 
-        for (int gy = 0; gy < gt_height; ++gy) {
-            for (int gx = 0; gx < gt_width; ++gx) {
-                int gt_idx = gy * gt_width + gx;
-                int8_t gt_val = gt_occupancy_grid_.data[gt_idx];
+        int cur_w = current_map_->info.width;
+        int cur_h = current_map_->info.height;
 
-                // GT'de unknown ise atla
-                if (gt_val == -1) continue;
+        for (int gy = 0; gy < gt_occupancy_grid_.info.height; ++gy) {
+            for (int gx = 0; gx < gt_occupancy_grid_.info.width; ++gx) {
 
-                bool gt_free = (gt_val < free_threshold_);
-                bool gt_occupied = (gt_val >= occupied_threshold_);
+                int gt_idx = gy * gt_occupancy_grid_.info.width + gx;
+                if (gt_occupancy_grid_.data[gt_idx] == -1)
+                    continue; // GT unknown → ölçme
 
-                double wx = gt_origin_x + (gx + 0.5) * gt_resolution;
-                double wy = gt_origin_y + (gy + 0.5) * gt_resolution;
+                double wx = gt_ox + (gx + 0.5) * gt_res;
+                double wy = gt_oy + (gy + 0.5) * gt_res;
 
-                int cx = static_cast<int>((wx - curr_origin_x) / curr_resolution);
-                int cy = static_cast<int>((wy - curr_origin_y) / curr_resolution);
+                int cx = static_cast<int>((wx - cur_ox) / cur_res);
+                int cy = static_cast<int>((wy - cur_oy) / cur_res);
 
-                // Sınır dışı ise atla (henüz keşfedilmemiş sayılır)
-                if (cx < 0 || cx >= curr_width || cy < 0 || cy >= curr_height) continue;
+                if (cx < 0 || cy < 0 || cx >= cur_w || cy >= cur_h)
+                    continue;
 
-                int curr_idx = cy * curr_width + cx;
-                int8_t curr_val = current_map_->data[curr_idx];
+                int cur_idx = cy * cur_w + cx;
 
-                // Anlık haritada unknown ise atla (henüz keşfedilmemiş)
-                if (curr_val == -1) continue;
-
-                bool curr_free = (curr_val < free_threshold_);
-                bool curr_occupied = (curr_val >= occupied_threshold_);
-
-                // Değerler eşleşiyor mu?
-                if ((gt_free && curr_free) || (gt_occupied && curr_occupied)) {
-                    matched++;
-                } else {
-                    mismatched++;
+                if (current_map_->data[cur_idx] != -1) {
+                    discovered++;
                 }
             }
         }
 
-        // Keşif yüzdesi = doğru eşleşen / GT toplam known
-        // Yanlış yüzdesi = yanlış eşleşen / GT toplam known
-        msg.exploration_2d_percentage = (gt_known_cells_ > 0) ?
-            (static_cast<double>(matched) / gt_known_cells_) * 100.0 : 0.0;
+        msg.exploration_2d_percentage =
+            (static_cast<double>(discovered) / gt_known_cells_) * 100.0;
 
-        double error_percentage = (gt_known_cells_ > 0) ?
-            (static_cast<double>(mismatched) / gt_known_cells_) * 100.0 : 0.0;
+        // Calculate explored area in m²
+        double cell_area = gt_res * gt_res;  // m² per cell
+        last_explored_area_m2_ = discovered * cell_area;
+        gt_total_area_m2_ = gt_known_cells_ * cell_area;
 
-        // Debug log
-        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 10000,
-            "2D: Keşif=%.1f%% (%d/%d) | Yanlış=%.1f%% (%d/%d)",
-            msg.exploration_2d_percentage, matched, gt_known_cells_,
-            error_percentage, mismatched, gt_known_cells_);
+        RCLCPP_INFO_THROTTLE(
+            get_logger(), *get_clock(), 10000,
+            "2D Coverage: %.1f%% (%.1f / %.1f m²)",
+            msg.exploration_2d_percentage,
+            last_explored_area_m2_, gt_total_area_m2_);
     }
+
 
     void calculateOctomapMetrics(exploration_metrics::msg::ExplorationMetrics& msg)
     {
@@ -715,11 +782,18 @@ private:
         double error_percentage = (gt_known_voxels_ > 0) ?
             (static_cast<double>(mismatched) / gt_known_voxels_) * 100.0 : 0.0;
 
+        // Calculate explored volume in m³
+        double voxel_res = gt_octomap_->getResolution();
+        double voxel_volume = voxel_res * voxel_res * voxel_res;  // m³ per voxel
+        last_explored_volume_m3_ = matched * voxel_volume;
+        gt_total_volume_m3_ = gt_known_voxels_ * voxel_volume;
+
         // Debug log
         RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 10000,
-            "3D: Keşif=%.1f%% (%d/%d) | Yanlış=%.1f%% (%d/%d)",
-            msg.exploration_3d_percentage, matched, gt_known_voxels_,
-            error_percentage, mismatched, gt_known_voxels_);
+            "3D: Keşif=%.1f%% (%.2f / %.2f m³) | Yanlış=%.1f%%",
+            msg.exploration_3d_percentage,
+            last_explored_volume_m3_, gt_total_volume_m3_,
+            error_percentage);
     }
 
     void publishVisualizationMarkers(const exploration_metrics::msg::ExplorationMetrics& msg)
@@ -744,10 +818,12 @@ private:
 
         char text_buf[512];
         snprintf(text_buf, sizeof(text_buf),
-                 "[%s]\n2D: %.1f%% | 3D: %.1f%%\nPath: %.1fm | Vel: %.2fm/s",
+                 "[%s]\n2D: %.1f%% (%.1f m²) | 3D: %.1f%% (%.2f m³)\nPath: %.1fm | Vel: %.2fm/s",
                  map_name_.c_str(),
                  msg.exploration_2d_percentage,
+                 last_explored_area_m2_,
                  msg.exploration_3d_percentage,
+                 last_explored_volume_m3_,
                  telemetry_received_ ? latest_telemetry_.total_path_traveled : 0.0,
                  telemetry_received_ ? latest_telemetry_.velocity_horizontal : 0.0);
         text_marker.text = text_buf;
@@ -901,6 +977,12 @@ private:
     double last_2d_pct_ = 0.0;
     double last_3d_pct_ = 0.0;
     double last_exploration_rate_ = 0.0;
+
+    // Explored area/volume in absolute units
+    double last_explored_area_m2_ = 0.0;      // 2D explored area in m²
+    double last_explored_volume_m3_ = 0.0;    // 3D explored volume in m³
+    double gt_total_area_m2_ = 0.0;           // Ground truth total area in m²
+    double gt_total_volume_m3_ = 0.0;         // Ground truth total volume in m³
 
     // ROS interfaces
     rclcpp::Publisher<exploration_metrics::msg::ExplorationMetrics>::SharedPtr metrics_pub_;

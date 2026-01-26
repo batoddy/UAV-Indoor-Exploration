@@ -103,6 +103,7 @@ private:
   void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
   {
     auto now_time = now();
+    auto now_wall = std::chrono::steady_clock::now();
 
     // Store previous values for acceleration calculation
     prev_velocity_ = current_velocity_;
@@ -120,17 +121,12 @@ private:
     current_vel_magnitude_ = std::sqrt(vx*vx + vy*vy + vz*vz);
     current_vel_horizontal_ = std::sqrt(vx*vx + vy*vy);
 
-    // Update average velocity (exponential moving average)
+    // Update path and average velocity
     if (!first_odom_received_) {
       first_odom_received_ = true;
-      session_start_time_ = now_time;
-      avg_velocity_ = current_vel_horizontal_;
+      session_start_wall_ = now_wall;
       last_position_ = current_position_;
     } else {
-      // EMA with alpha = 0.02 for smooth average
-      double alpha = 0.02;
-      avg_velocity_ = alpha * current_vel_horizontal_ + (1.0 - alpha) * avg_velocity_;
-
       // Accumulate path traveled
       double dx = current_position_.x - last_position_.x;
       double dy = current_position_.y - last_position_.y;
@@ -140,6 +136,12 @@ private:
         total_path_traveled_ += dist_delta;
       }
       last_position_ = current_position_;
+
+      // Calculate true average velocity = total distance / total time (wall clock)
+      double session_time = std::chrono::duration<double>(now_wall - session_start_wall_).count();
+      if (session_time > 0.1) {
+        avg_velocity_ = total_path_traveled_ / session_time;
+      }
     }
 
     // Calculate acceleration (numerical differentiation)
@@ -220,7 +222,8 @@ private:
 
     // Path statistics
     telemetry.total_path_traveled = total_path_traveled_;
-    telemetry.session_time = (now() - session_start_time_).seconds();
+    telemetry.session_time = std::chrono::duration<double>(
+        std::chrono::steady_clock::now() - session_start_wall_).count();
 
     telemetry_pub_->publish(telemetry);
 
@@ -263,7 +266,7 @@ private:
   geometry_msgs::msg::Twist prev_velocity_;
   rclcpp::Time current_time_;
   rclcpp::Time prev_time_;
-  rclcpp::Time session_start_time_;
+  std::chrono::steady_clock::time_point session_start_wall_;
 
   double current_vel_magnitude_ = 0.0;
   double current_vel_horizontal_ = 0.0;

@@ -41,14 +41,14 @@ controller_server:
       stateful: true
     FollowPath:
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
-      desired_linear_vel: 1.5
-      lookahead_dist: 0.8
-      min_lookahead_dist: 0.4
-      max_lookahead_dist: 1.5
+      desired_linear_vel: 2.5
+      lookahead_dist: 1.2
+      min_lookahead_dist: 0.6
+      max_lookahead_dist: 2.5
       lookahead_time: 1.5
       use_velocity_scaled_lookahead_dist: true
-      min_approach_linear_velocity: 0.4
-      use_regulated_linear_velocity_scaling: true
+      min_approach_linear_velocity: 0.5
+      use_regulated_linear_velocity_scaling: false
       allow_reversing: false
       use_rotate_to_heading: true
       max_angular_accel: 1.0
@@ -61,8 +61,8 @@ global_costmap:
       robot_base_frame: base_link
       update_frequency: 10.0              # 5→10 Hz, daha responsive
       publish_frequency: 5.0              # 2→5 Hz
-      width: 50
-      height: 50
+      width: 100
+      height: 100
       rolling_window: true
       track_unknown_space: true
       resolution: 0.1
@@ -78,7 +78,7 @@ global_costmap:
 
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        inflation_radius: 0.8             # 1.0→0.8, daha agile pathing
+        inflation_radius: 0.6             # 1.0→0.8, daha agile pathing
         cost_scaling_factor: 3.0          # 2.0→3.0, daha smooth maliyet geçişi
 
 local_costmap:
@@ -113,7 +113,7 @@ local_costmap:
             durability: volatile
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        inflation_radius: 0.8
+        inflation_radius: 0.6
         cost_scaling_factor: 3.0
 
 behavior_server:

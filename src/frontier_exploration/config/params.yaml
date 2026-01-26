@@ -9,7 +9,7 @@ frontier_detector:
     output_topic: "frontier_clusters"
 
     # Clustering parameters
-    min_frontier_size: 5       # Min cells for valid cluster
+    min_frontier_size: 3       # Min cells for valid cluster (düşürüldü: küçük frontier'lar da algılansın)
     max_cluster_size: 27       # Max cells before PCA split
     free_threshold: 25         # Occupancy < this = free
     occupied_threshold: 65     # Occupancy >= this = occupied
@@ -29,14 +29,14 @@ viewpoint_generator:
     sensor_fov_h: 1.57         # Horizontal FOV (~90°)
 
     # Cylindrical sampling
-    min_dist: 0.5              # Min distance from cluster (safety buffer)
+    min_dist: 1.0              # Min distance from cluster (safety buffer)
     max_dist: 3.0              # Max distance from cluster
     num_dist_samples: 5        # Radial samples
-    num_angle_samples: 16      # Angular samples (every 22.5°) - increased for normal sampling
+    num_angle_samples: 16      # Angular samples around cluster
 
     # Filtering
-    min_coverage: 3            # Min visible cells (absolute minimum)
-    max_viewpoints: 5          # Max VPs per cluster
+    min_coverage: 5            # Min visible cells (absolute minimum)
+    max_viewpoints: 5          # Max VPs per cluster (artırıldı: daha fazla seçenek)
 
     free_threshold: 25
     occupied_threshold: 65
@@ -67,7 +67,7 @@ viewpoint_generator:
     require_los_to_centroid: true  # Reject VP if wall blocks view to centroid
     min_coverage_ratio: 0.2        # 20% of frontier cells must be visible
     use_normal_sampling: false      # Only sample viewpoints on the "free space" side // bunu dene
-    normal_angle_range: 2.094      # Sample within +/-60 of normal (120 total, ~2.094 rad)
+    normal_angle_range: 3.0     # Sample within +/-60 of normal (120 total, ~2.094 rad)
 
 # ============ Node 3: Frontier Visualizer ============
 frontier_visualizer:

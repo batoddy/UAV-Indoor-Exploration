@@ -11,7 +11,7 @@ class TeleopNode(Node):
     def __init__(self):
         super().__init__('teleop_node')
         
-        self.declare_parameter('v_max', 1.0)
+        self.declare_parameter('v_max', 2.0)
         self.v_max = self.get_parameter('v_max').value
         
         self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
@@ -40,9 +40,9 @@ class TeleopNode(Node):
                 elif key == 's':
                     twist.linear.x = -self.v_max
                 elif key == 'a':
-                    twist.angular.z = 1.0
+                    twist.angular.z = 1.5
                 elif key == 'd':
-                    twist.angular.z = -1.0
+                    twist.angular.z = -1.5
                 elif key == 'W':  # Shift+w
                     twist.linear.z = self.v_max
                 elif key == '\x17':  # Ctrl+w

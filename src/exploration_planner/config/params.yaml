@@ -18,17 +18,17 @@
     
     # ==========================================================================
     v_max: 2.5               # [m/s] Maximum linear velocity (kamera stabilitesi için)
-    yaw_rate_max: 1.5        # [rad/s] Maximum yaw rate (overshoot azaltmak için düşürüldü)
+    yaw_rate_max: 2.5        # [rad/s] Maximum yaw rate (~143 deg/s)
 
-    a_max: 0.6                  # [m/s²] Max linear acceleration (kamera pitch için dengeli)
-    yaw_accel_max: 1.0          # [rad/s²] Max yaw acceleration (smooth dönüş için)
+    a_max: 0.7                 # [m/s²] Max linear acceleration (düz yolda hızlı, 0.7'den artırıldı)
+    yaw_accel_max: 1.1          # [rad/s²] Max yaw acceleration (artırıldı: hızlı ramp-up)
 
 
     # ==========================================================================
     # ROBOT FOOTPRINT
     # ==========================================================================
-    robot_width: 1.2            # [m] Drone width (X axis)
-    robot_length: 1.2             # [m] Drone length (Y axis)
+    robot_width: 1.0            # [m] Drone width (X axis)
+    robot_length: 1.0             # [m] Drone length (Y axis)
     robot_height: 0.3             # [m] Drone height (for visualization)
     # inscribed_radius = max(width, length) / 2 = 0.25m (otomatik hesaplanir)
     
@@ -96,11 +96,12 @@
     costmap_topic: "/global_costmap/costmap"
 
     # Cost weights
-    w_distance: 1.2               # Distance penalty [0.0 - 2.0]
-    w_size: 0.1                   # Small cluster penalty
-    w_angle: 0.2                 # Direction change penalty
-    w_coverage: 0.4               # Low coverage penalty
-    max_viewpoints_to_evaluate: 5 # Evaluate top N viewpoints per cluster (not just best)
+    w_distance: 3.0               # Distance penalty (düşürüldü: uzak frontier'lar da değerlensin)
+    w_size: 0.02                  # Small cluster penalty
+    w_angle: 0.3                 # Direction change penalty (artırıldı: zigzag önle)
+    w_coverage: 0.8               # Low coverage penalty (artırıldı: coverage önemli)
+
+    max_viewpoints_to_evaluate: 5 # Evaluate top N viewpoints per cluster (artırıldı)
     
     # ==========================================================================
     # LOCAL REFINER
@@ -114,7 +115,7 @@
     # ==========================================================================
     traj_dt: 0.1                  # [s] Trajectory time step
     lookahead_time: 3.0           # [s] Max trajectory duration
-    min_waypoint_dist: 0.2        # [m] Min distance between waypoints
+    min_waypoint_dist: 0.3        # [m] Min distance between waypoints
     
     # Smooth Yaw Distribution Along Path
     # Path boyunca yaw'i smooth sekilde dagitir:
@@ -129,24 +130,24 @@
     # TRAJECTORY FOLLOWER (Smooth Motion)
     # ==========================================================================
     control_rate: 30.0            # [Hz] Control loop frequency
-    goal_tolerance_xy: 0.25       # [m] Position tolerance (tighter: 25cm)
-    goal_tolerance_yaw: 0.15      # [rad] Yaw tolerance (~8.5 deg)
+    goal_tolerance_xy: 0.15       # [m] Position tolerance (tighter: 25cm)
+    goal_tolerance_yaw: 0.02      # [rad] Yaw tolerance (~8.5 deg)
 
     # PD Gains - Proportional + Derivative for smooth control
-    kp_linear: 1.5                # Position proportional gain (biraz artırıldı)
-    kd_linear: 0.6                # Position derivative gain (reduces overshoot)
-    kp_yaw: 0.8                   # Yaw proportional gain (overshoot için düşürüldü)
-    kd_yaw: 0.6                   # Yaw derivative gain (damping artırıldı - kritik!)
+    kp_linear: 2.5                # Position proportional gain (düz yolda hızlı, 2.5'ten artırıldı)
+    kd_linear: 0.1                # Position derivative gain (biraz azaltıldı)
+    kp_yaw: 2.0                   # Yaw proportional gain (artırıldı: daha agresif dönüş)
+    kd_yaw: 1.0                   # Yaw derivative gain (artırıldı: overshoot'u önler)
 
     # Smoothing parameters
-    velocity_smoothing: 0.2       # Exponential smoothing (biraz daha reaktif)
-    slowdown_distance: 1.0        # [m] Start slowing before goal
-    min_approach_speed: 0.4       # [m/s] Minimum speed when approaching
+    velocity_smoothing: 0.2      # Exponential smoothing (daha reaktif, 0.12'den azaltıldı)
+    slowdown_distance: 0.6        # [m] Start slowing before goal (daha geç yavaşla)
+    min_approach_speed: 0.5       # [m/s] Minimum speed when approaching
     
     # Progressive Yaw - Trajectory follower'da ek yaw smoothing
     # (trajectory_generator zaten smooth yaw uretiyor, bu ekstra refinement)
     progressive_yaw_distance: 2.5 # [m] Bu mesafede donmeye basla
-    progressive_yaw_blend: 0.7    # 0=hareket yonu, 1=hedef yaw (blend faktoru)
+    progressive_yaw_blend: 0.8    # 0=hareket yonu, 1=hedef yaw (blend faktoru)
     
     # ==========================================================================
     # HEIGHT CONTROL

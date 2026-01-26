@@ -16,7 +16,7 @@
 exploration_metrics_node:
   ros__parameters:
     # Comparison mode: "occupancy_grid", "octomap", or "both"
-    comparison_mode: "occupancy_grid"
+    comparison_mode: "both"
 
     # Map name (set via launch argument)
     map_name: "default"

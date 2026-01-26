@@ -202,7 +202,7 @@ private:
       trail.id = id++;
       trail.type = visualization_msgs::msg::Marker::LINE_STRIP;
       trail.action = visualization_msgs::msg::Marker::ADD;
-      trail.scale.x = 0.05;  // Line width
+      trail.scale.x = 0.15;  // Line width (kalınlaştırıldı)
       
       // Orange color (turuncu)
       trail.color.r = 1.0;

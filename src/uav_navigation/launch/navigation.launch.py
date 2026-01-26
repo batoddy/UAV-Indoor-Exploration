@@ -67,7 +67,7 @@ Node(
         # ============ Z EKSENİ FİLTRELEME ============
         'pointcloud_min_z': -0.5,
         'pointcloud_max_z': 10.0,
-        
+            
         # ⭐ 2D HARİTAYA PROJEKSİYON
         'occupancy_min_z': 1.0,               # ⭐ 50cm altı engel sayılmaz
         'occupancy_max_z': 1.8,              # ⭐ 1.5m üstü engel sayılmaz

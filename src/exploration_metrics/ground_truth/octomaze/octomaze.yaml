@@ -1,0 +1,6 @@
+image: ground_truth_20260125_233720.pgm
+resolution: 0.200000
+origin: [-33.000002, -32.399999, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
