@@ -3,9 +3,9 @@
  * 
  * Input:  
  *   /frontier_clusters_with_viewpoints (frontier_exploration/FrontierArray)
- *          ✅ Feature-rich viewpoints from Viewpoint Generator
- *          ✅ Viewpoints ranked by occlusion-aware coverage
- *          ✅ Cluster context embedded in each viewpoint
+ *          Feature-rich viewpoints from Viewpoint Generator
+ *          Viewpoints ranked by occlusion-aware coverage
+ *          Cluster context embedded in each viewpoint
  *   /odom or /mavros/local_position/pose (current position)
  * 
  * Output: 
@@ -19,10 +19,10 @@
  *   cost = w_dist * distance + w_size * (1/cluster_size) + w_angle * angle_change + w_coverage * (1/coverage)
  * 
  * Key Improvements:
- *   ✅ Evaluates ALL viewpoints (top N per cluster), not just the best one
- *   ✅ Uses occlusion-aware coverage (more accurate)
- *   ✅ Cluster context embedded in viewpoints (no additional lookups)
- *   ✅ Viewpoints already temporally stabilized
+ *   Evaluates ALL viewpoints (top N per cluster), not just the best one
+ *   Uses occlusion-aware coverage (more accurate)
+ *   Cluster context embedded in viewpoints (no additional lookups)
+ *   Viewpoints already temporally stabilized
  */
 
 #include <rclcpp/rclcpp.hpp>
@@ -47,7 +47,6 @@ public:
     declare_parameter("input_topic", "frontier_clusters_with_viewpoints");
     declare_parameter("odom_topic", "/odom");
     declare_parameter("output_topic", "/exploration/global_tour");
-    declare_parameter("costmap_topic", "/global_costmap/costmap");
 
     // Cost function weights
     declare_parameter("w_distance", 1.0);
@@ -69,7 +68,6 @@ public:
     input_topic_ = get_parameter("input_topic").as_string();
     odom_topic_ = get_parameter("odom_topic").as_string();
     output_topic_ = get_parameter("output_topic").as_string();
-    costmap_topic_ = get_parameter("costmap_topic").as_string();
 
     w_distance_ = get_parameter("w_distance").as_double();
     w_size_ = get_parameter("w_size").as_double();
@@ -116,16 +114,6 @@ public:
     metrics_start_client_ = create_client<std_srvs::srv::Trigger>("/exploration_metrics/start_timer");
     metrics_stop_client_ = create_client<std_srvs::srv::Trigger>("/exploration_metrics/stop_timer");
 
-    costmap_sub_ =
-        this->create_subscription<nav_msgs::msg::OccupancyGrid>(
-          costmap_topic_,
-          rclcpp::QoS(1).transient_local(),
-          [this](const nav_msgs::msg::OccupancyGrid::SharedPtr msg)
-          {
-            costmap_ = msg;
-          });
-
-    
     RCLCPP_INFO(get_logger(), "Greedy Frontier Selector initialized");
     RCLCPP_INFO(get_logger(), "  Input: %s", input_topic_.c_str());
     RCLCPP_INFO(get_logger(), "  Output: %s", output_topic_.c_str());
@@ -200,8 +188,7 @@ private:
       return;
     }
     
-    // Filter clusters - only keep those with valid viewpoints
-    // ✅ Viewpoints are already feature-rich and ranked by coverage!
+    // Filter clusters - only keep those with valid viewpoints,
     std::vector<const frontier_exploration::msg::FrontierCluster*> valid_clusters;
     for (const auto& cluster : msg->clusters) {
       if (!cluster.viewpoints.empty()) {
@@ -220,7 +207,6 @@ private:
     }
     
     // Find best viewpoint across ALL clusters
-    // ✅ Evaluates occlusion-aware coverage, cluster context, and stability
     auto [best_cluster, best_vp_idx, best_cost] = selectBestViewpoint(valid_clusters);
     
     if (!best_cluster) {
@@ -244,7 +230,7 @@ private:
     
     // ═══════════════════════════════════════════════════════════════════
     // Calculate target yaw - where camera should look when arriving
-    // ✅ vp.yaw is now computed by Viewpoint Generator with occlusion-awareness
+    // vp.yaw is now computed by Viewpoint Generator with occlusion-awareness
     // For additional flexibility, we can also calculate based on cluster centroid
     // ═══════════════════════════════════════════════════════════════════
     double cx = best_cluster->centroid.x;
@@ -291,9 +277,9 @@ private:
   
   /**
    * Evaluate ALL viewpoints from ALL clusters and return the best one
-   * ✅ NEW: Viewpoints are now feature-rich with occlusion-aware coverage
-   * ✅ NEW: Cluster context embedded in each viewpoint (cluster_id, cluster_size, cluster_centroid)
-   * ✅ NEW: Viewpoints already temporally stabilized
+   * NEW: Viewpoints are now feature-rich with occlusion-aware coverage
+   * NEW: Cluster context embedded in each viewpoint (cluster_id, cluster_size, cluster_centroid)
+   * NEW: Viewpoints already temporally stabilized
    * 
    * Returns: (cluster_ptr, viewpoint_index, cost)
    * 
@@ -328,7 +314,7 @@ private:
       max_size = std::max(max_size, cluster->size);
       for (const auto& vp : cluster->viewpoints) {
         max_coverage = std::max(max_coverage, vp.coverage);
-        // ✅ Use embedded cluster_size if available, fallback to cluster->size
+        // Use embedded cluster_size if available, fallback to cluster->size
         uint32_t vp_cluster_size = (vp.cluster_size > 0) ? vp.cluster_size : cluster->size;
         max_size = std::max(max_size, vp_cluster_size);
         double dist = distance2D(current_pos, vp.position);
@@ -351,7 +337,7 @@ private:
         double dist_cost = dist / max_dist;
         
         // 2. Size cost (inverted - bigger is better)
-        // ✅ Use embedded cluster_size if available, fallback to cluster->size
+        // Use embedded cluster_size if available, fallback to cluster->size
         uint32_t vp_cluster_size = (vp.cluster_size > 0) ? vp.cluster_size : cluster->size;
         double size_cost = 1.0 - (static_cast<double>(vp_cluster_size) / max_size);
         
@@ -367,7 +353,7 @@ private:
         }
         
         // 4. Coverage cost (inverted - higher occlusion-aware coverage is better)
-        // ✅ Uses coverage from Viewpoint Generator (occlusion-aware)
+        // Uses coverage from Viewpoint Generator (occlusion-aware)
         double coverage_cost = 1.0 - (static_cast<double>(vp.coverage) / max_coverage);
         
         // === Total Cost ===
@@ -396,7 +382,6 @@ private:
   std::string input_topic_;
   std::string odom_topic_;
   std::string output_topic_;
-  std::string costmap_topic_;
 
   // Parameters
   double w_distance_;
@@ -413,10 +398,6 @@ private:
   geometry_msgs::msg::Twist current_velocity_;
   bool have_pose_ = false;
   bool exploration_active_ = false;
-  
-  nav_msgs::msg::OccupancyGrid::SharedPtr costmap_;
-  rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_sub_;
-
 
   // ROS
   rclcpp::Subscription<frontier_exploration::msg::FrontierArray>::SharedPtr clusters_sub_;

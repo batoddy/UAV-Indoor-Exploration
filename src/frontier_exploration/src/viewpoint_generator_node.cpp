@@ -714,35 +714,6 @@ private:
         return {best_yaw, best_cov};
     }
 
-    // Simple coverage: count LOS-visible frontier cells (no occlusion bin blocking)
-    int computeCoverageSimple(const geometry_msgs::msg::Point &vp_pos, double yaw,
-                              const frontier_exploration::msg::FrontierCluster &cluster,
-                              const nav_msgs::msg::OccupancyGrid &map)
-    {
-        const double range2 = sensor_range_ * sensor_range_;
-        const double half_fov = sensor_fov_h_ * 0.5;
-
-        int count = 0;
-        for (const auto &cell : cluster.cells)
-        {
-            const double dx = cell.x - vp_pos.x;
-            const double dy = cell.y - vp_pos.y;
-            const double d2 = dx * dx + dy * dy;
-            if (d2 > range2)
-                continue;
-
-            const double a = std::atan2(dy, dx);
-            if (angleDiff(a, yaw) > half_fov)
-                continue;
-
-            if (hasLineOfSight(vp_pos.x, vp_pos.y, cell.x, cell.y, map))
-            {
-                count++;
-            }
-        }
-        return count;
-    }
-
     // ----------------------------
     // OPTIMIZED: Pre-computed cell data for yaw optimization
     // ----------------------------

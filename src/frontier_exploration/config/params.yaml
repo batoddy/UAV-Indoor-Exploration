@@ -52,7 +52,7 @@ viewpoint_generator:
     height_tolerance: 0.5      # [m] Check obstacles in this Z range
 
     # Viewpoint stabilization
-    vp_stabilization_enabled: true
+    vp_stabilization_enabled: false
     vp_hysteresis_distance: 1.0   # [m] Keep old VP if new one is within this distance
     vp_hysteresis_coverage: 1.3   # Multiplier: new must be > old * this to replace
     vp_tracking_timeout: 5.0      # [s] Reset tracking after this timeout
@@ -64,10 +64,10 @@ viewpoint_generator:
 
     # Viewpoint Quality Filters
     # These prevent viewpoints from being placed behind obstacles
-    require_los_to_centroid: true  # Reject VP if wall blocks view to centroid
+    min_los_frontier_cells: 3      # Min frontier cells with LOS required (0 to disable)
     min_coverage_ratio: 0.2        # 20% of frontier cells must be visible
-    use_normal_sampling: false      # Only sample viewpoints on the "free space" side // bunu dene
-    normal_angle_range: 3.0     # Sample within +/-60 of normal (120 total, ~2.094 rad)
+    use_normal_sampling: true      # Only sample viewpoints on the "free space" side
+    normal_angle_range: 3.141      # Sample within +/-60 of normal (120 total)
 
 # ============ Node 3: Frontier Visualizer ============
 frontier_visualizer:
