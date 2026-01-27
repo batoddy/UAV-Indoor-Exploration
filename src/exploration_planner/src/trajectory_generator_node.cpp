@@ -44,6 +44,10 @@ public:
     traj_pub_ = create_publisher<exploration_planner::msg::Trajectory>(
       "/exploration/trajectory", 10);
 
+    // Path publisher for RViz visualization
+    traj_path_pub_ = create_publisher<nav_msgs::msg::Path>(
+      "/exploration/trajectory_path", 10);
+
     RCLCPP_INFO(get_logger(), "Trajectory Generator: yaw_blend_dist=%.1fm", yaw_blend_dist_);
   }
 
@@ -63,6 +67,12 @@ private:
     traj.header.stamp = now();
     traj.header.frame_id = msg->header.frame_id;
     traj_pub_->publish(traj);
+
+    // Publish as Path for RViz visualization
+    nav_msgs::msg::Path traj_path;
+    traj_path.header = traj.header;
+    traj_path.poses = traj.poses;
+    traj_path_pub_->publish(traj_path);
   }
 
   exploration_planner::msg::Trajectory generateTrajectory(const nav_msgs::msg::Path& path)
@@ -180,6 +190,7 @@ private:
   rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr path_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
   rclcpp::Publisher<exploration_planner::msg::Trajectory>::SharedPtr traj_pub_;
+  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr traj_path_pub_;
 };
 
 int main(int argc, char** argv)

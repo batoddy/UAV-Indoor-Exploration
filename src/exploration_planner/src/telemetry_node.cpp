@@ -130,8 +130,7 @@ private:
       // Accumulate path traveled
       double dx = current_position_.x - last_position_.x;
       double dy = current_position_.y - last_position_.y;
-      double dz = current_position_.z - last_position_.z;
-      double dist_delta = std::sqrt(dx*dx + dy*dy + dz*dz);
+      double dist_delta = std::sqrt(dx*dx + dy*dy);
       if (dist_delta < 1.0) {  // Sanity check - skip teleports
         total_path_traveled_ += dist_delta;
       }

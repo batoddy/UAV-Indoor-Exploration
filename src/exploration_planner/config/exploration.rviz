@@ -120,6 +120,24 @@ Visualization Manager:
       Head Length: 0.05
 
     # ═══════════════════════════════════════════════════════════════════
+    # TRAJECTORY PATH (generated trajectory with yaw blending)
+    # ═══════════════════════════════════════════════════════════════════
+    - Class: rviz_default_plugins/Path
+      Enabled: true
+      Name: TrajectoryPath
+      Topic:
+        Value: /exploration/trajectory_path
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+      Color: 255; 0; 255
+      Line Style: Lines
+      Alpha: 1.0
+      Pose Style: Arrows
+      Shaft Length: 0.15
+      Head Length: 0.08
+
+    # ═══════════════════════════════════════════════════════════════════
     # FRONTIER MARKERS
     # ═══════════════════════════════════════════════════════════════════
     - Class: rviz_default_plugins/MarkerArray

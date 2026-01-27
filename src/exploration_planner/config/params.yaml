@@ -17,11 +17,11 @@
     # yaw_accel_max: 1.5           # [rad/s²] Max yaw acceleration (was 1.0)
     
     # ==========================================================================
-    v_max: 2.5               # [m/s] Maximum linear velocity (kamera stabilitesi için)
-    yaw_rate_max: 2.5        # [rad/s] Maximum yaw rate (~143 deg/s)
+    v_max: 2.0               # [m/s] Maximum linear velocity (sakinleştirildi)
+    yaw_rate_max: 1.5        # [rad/s] Maximum yaw rate (~86 deg/s, daha sakin)
 
-    a_max: 0.7                 # [m/s²] Max linear acceleration (düz yolda hızlı, 0.7'den artırıldı)
-    yaw_accel_max: 1.1          # [rad/s²] Max yaw acceleration (artırıldı: hızlı ramp-up)
+    a_max: 0.5                 # [m/s²] Max linear acceleration (yumuşak ivmelenme)
+    yaw_accel_max: 0.8         # [rad/s²] Max yaw acceleration (overshoot önleme)
 
 
     # ==========================================================================
@@ -96,10 +96,10 @@
     costmap_topic: "/global_costmap/costmap"
 
     # Cost weights
-    w_distance: 3.0               # Distance penalty (düşürüldü: uzak frontier'lar da değerlensin)
+    w_distance: 2.0               # Distance penalty (düşürüldü: uzak frontier'lar da değerlensin)
     w_size: 0.02                  # Small cluster penalty
-    w_angle: 0.3                 # Direction change penalty (artırıldı: zigzag önle)
-    w_coverage: 0.8               # Low coverage penalty (artırıldı: coverage önemli)
+    w_angle: 0.4                 # Direction change penalty (artırıldı: zigzag önle)
+    w_coverage: 0.4               # Low coverage penalty (artırıldı: coverage önemli)
 
     max_viewpoints_to_evaluate: 5 # Evaluate top N viewpoints per cluster (artırıldı)
     
@@ -127,27 +127,32 @@
     yaw_final_blend_dist: 2.5     # [m] Frontier'a donme mesafesi
     
     # ==========================================================================
-    # TRAJECTORY FOLLOWER (Smooth Motion)
+    # TRAJECTORY FOLLOWER (Pure Pursuit Algorithm)
     # ==========================================================================
+    # Pure Pursuit: Path üzerinde kalarak ilerler, kestirme yapmaz
+    #   1. Path üzerindeki en yakın noktayı bulur
+    #   2. Lookahead mesafesi kadar ilerideki noktayı hedefler
+    #   3. Bu sayede rotayı kesin takip eder
+
     control_rate: 30.0            # [Hz] Control loop frequency
-    goal_tolerance_xy: 0.15       # [m] Position tolerance (tighter: 25cm)
-    goal_tolerance_yaw: 0.02      # [rad] Yaw tolerance (~8.5 deg)
+    goal_tolerance_xy: 0.15       # [m] Position tolerance
+    goal_tolerance_yaw: 0.1       # [rad] Yaw tolerance (~5.7 deg)
+
+    # Pure Pursuit Parameters
+    lookahead_distance: 1.0       # [m] Base lookahead distance (artırıldı: daha smooth dönüşler)
+    min_lookahead_distance: 0.2   # [m] Minimum lookahead (düşük hızda)
+    lookahead_gain: 0.4           # Lookahead = base + gain * velocity (hıza göre lookahead artışı)
 
     # PD Gains - Proportional + Derivative for smooth control
-    kp_linear: 2.5                # Position proportional gain (düz yolda hızlı, 2.5'ten artırıldı)
-    kd_linear: 0.1                # Position derivative gain (biraz azaltıldı)
-    kp_yaw: 2.0                   # Yaw proportional gain (artırıldı: daha agresif dönüş)
-    kd_yaw: 1.0                   # Yaw derivative gain (artırıldı: overshoot'u önler)
+    kp_linear: 1.0                # Position proportional gain (azaltıldı: daha yumuşak)
+    kd_linear: 0.6                # Position derivative gain (artırıldı: daha fazla damping)
+    kp_yaw: 1.0                   # Yaw proportional gain (azaltıldı: daha sakin dönüş)
+    kd_yaw: 0.5                   # Yaw derivative gain
 
     # Smoothing parameters
-    velocity_smoothing: 0.2      # Exponential smoothing (daha reaktif, 0.12'den azaltıldı)
-    slowdown_distance: 0.6        # [m] Start slowing before goal (daha geç yavaşla)
-    min_approach_speed: 0.5       # [m/s] Minimum speed when approaching
-    
-    # Progressive Yaw - Trajectory follower'da ek yaw smoothing
-    # (trajectory_generator zaten smooth yaw uretiyor, bu ekstra refinement)
-    progressive_yaw_distance: 2.5 # [m] Bu mesafede donmeye basla
-    progressive_yaw_blend: 0.8    # 0=hareket yonu, 1=hedef yaw (blend faktoru)
+    velocity_smoothing: 0.25      # Exponential smoothing (artırıldı: daha smooth)
+    slowdown_distance: 1.0        # [m] Start slowing before goal (daha erken yavaşla)
+    min_approach_speed: 0.4       # [m/s] Minimum speed when approaching
     
     # ==========================================================================
     # HEIGHT CONTROL
