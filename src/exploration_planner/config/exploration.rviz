@@ -52,7 +52,7 @@ Visualization Manager:
       Topic:
         Value: /global_costmap/costmap
         Depth: 5
-        Durability Policy: Volatile
+        Durability Policy: Transient Local
         Reliability Policy: Best Effort
       Alpha: 0.6
       Color Scheme: costmap

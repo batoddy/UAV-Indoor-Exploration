@@ -28,6 +28,64 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='true'),
 
+        Node(
+            package='octomap_server',
+            executable='octomap_server_node',
+            name='octomap_server',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                
+                # ============ TEMEL AYARLAR ============
+                'resolution': 0.20,
+                'frame_id': 'map',
+                'base_frame_id': 'base_link',
+                'transform_tolerance' : 1.0,
+                # ============ SENSÖR MODELİ ============
+                'sensor_model.max_range': 7.5,         # Azaltıldı - uzak noktalar güvenilmez
+                'sensor_model.min_range': 0.1,
+                'sensor_model.hit': 0.55,              # 0.6'dan düşür - tek ölçümde daha az güven
+                'sensor_model.miss': 0.40,             # 0.45'den düşür - boş alan daha agresif temizlesin
+                'sensor_model.min': 0.12,              
+                'sensor_model.max': 0.90,              
+
+                # ============ GÜRÜLTÜ FİLTRELEME ============
+                'filter_speckles': True,
+                'filter_speckles_size': 5,             # İzole vokselleri temizle
+                
+                # ============ Z EKSENİ FİLTRELEME ============
+                'pointcloud_min_z': -0.5,
+                'pointcloud_max_z': 10.0,
+                    
+                # 2D HARİTAYA PROJEKSİYON
+                'occupancy_min_z': 1.0,               # 1m altı engel sayılmaz
+                'occupancy_max_z': 1.8,              # 1.8m üstü engel sayılmaz
+                
+                # ============ ZEMİN FİLTRELEME ============
+                'filter_ground': True,
+                'ground_filter.distance': 0.5,        # Zemin algılama mesafesi
+                'ground_filter.angle': 0.35,          # Zemin açısı toleransı (~14°)
+                'ground_filter.plane_distance': 0.25, # Düzlem toleransı
+                    
+                # ============ YAYINLAMA AYARLARI ============
+                'latch': True,
+                'publish_free_space': True,
+                'publish_unknown_space': True,
+                'height_map': True,
+                'colored_map': False,
+
+                'automatic_expansion': True,          
+                'expand_rate': 10.0,           
+            }],
+            remappings=[
+                ('cloud_in', '/camera/points'),
+                ('projected_map', '/projected_map'),
+                ('octomap_binary', '/octomap_binary'),
+                ('octomap_full', '/octomap_full'),
+                ('octomap_point_cloud_centers', '/octomap_points'),
+            ],
+            output='screen'
+        ),
+
         # Node 1: Frontier Detector
         Node(
             package='frontier_exploration',

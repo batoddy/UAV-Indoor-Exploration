@@ -1,4 +1,7 @@
 build/
 install/
 log/
-frames*
+.bashrc
+.vscode 
+
+CLAUDE.md

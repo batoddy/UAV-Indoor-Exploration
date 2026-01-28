@@ -33,22 +33,6 @@ def generate_launch_description():
         DeclareLaunchArgument('rviz', default_value='false', description='Launch RViz'),
 
         # ============================================================
-        # NAV2 BRINGUP (handles all lifecycle management)
-        # ============================================================
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([
-                PathJoinSubstitution([
-                    FindPackageShare('nav2_bringup'), 'launch', 'navigation_launch.py'
-                ])
-            ]),
-            launch_arguments={
-                'use_sim_time': use_sim_time,
-                'params_file': nav2_params_file,
-                'autostart': 'true',
-            }.items()
-        ),
-
-        # ============================================================
         # EXPLORATION PLANNER NODES
         # ============================================================
 
@@ -114,6 +98,32 @@ def generate_launch_description():
             parameters=[params_file, {'use_sim_time': use_sim_time}],
             output='screen'
         ),
+
+             # ============================================================
+        # NAV2 PLANNER SERVER ONLY (controller, bt_navigator not used)
+        # ============================================================
+        # Planner Server (SmacPlanner2D for global path planning)
+        Node(
+            package='nav2_planner',
+            executable='planner_server',
+            name='planner_server',
+            parameters=[nav2_params_file, {'use_sim_time': use_sim_time}],
+            output='screen'
+        ),
+
+        # Lifecycle Manager (only for planner_server)
+        Node(
+            package='nav2_lifecycle_manager',
+            executable='lifecycle_manager',
+            name='lifecycle_manager_planner',
+            parameters=[{   
+                'use_sim_time': use_sim_time,
+                'autostart': True,
+                'node_names': ['planner_server']
+            }],
+            output='screen'
+        ),
+
 
         # ============================================================
         # RVIZ (optional)

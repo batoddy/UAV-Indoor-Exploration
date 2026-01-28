@@ -66,8 +66,8 @@ viewpoint_generator:
     # These prevent viewpoints from being placed behind obstacles
     min_los_frontier_cells: 3      # Min frontier cells with LOS required (0 to disable)
     min_coverage_ratio: 0.2        # 20% of frontier cells must be visible
-    use_normal_sampling: true      # Only sample viewpoints on the "free space" side
-    normal_angle_range: 3.141      # Sample within +/-60 of normal (120 total)
+    use_normal_sampling: false      # Only sample viewpoints on the "free space" side
+    normal_angle_range: 2.094      # Sample within +/-60 of normal (120 total)
 
 # ============ Node 3: Frontier Visualizer ============
 frontier_visualizer:
