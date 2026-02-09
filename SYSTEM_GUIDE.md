@@ -504,5 +504,3 @@ colcon build
 - **Target Flight Height:** 1.5m
 
 ---
-
-*Bu dosya Claude Code tarafından otomatik oluşturulmuştur. Son güncelleme: 2026-01-24*
